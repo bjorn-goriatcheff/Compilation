@@ -19,6 +19,7 @@ typedef unsigned char bool;
 #define GT	5
 #define GE	6
 
+
 /* Codes d'erreurs */
 #define NO_ERROR	0
 #define USAGE_ERROR	1
