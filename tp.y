@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS 
+%token IS VAR TYPE CLASS AFF
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -25,6 +25,7 @@ classLOpt:
 ;
 
 block: '{''}'
+;
 
 classBlock: '{' declListOpt '}'
 ;
@@ -33,16 +34,31 @@ declListOpt:
 | decl declListOpt
 ;
 
-decl: VAR Id ':' TYPE ';'
+decl: VAR Id ':' TYPE initInstOpt ';'
+;
+
+initInstOpt:
+| AFF Id
 
 classHeader: CLASS param initBlockOpt
 ;
 
 initBlockOpt: 
-| '{' affList '}' 
+| '{' affList '}'
+; 
 
-affList: aff 
-| aff ';' affList
+affList: affInst 
+| affInst affList
+;
+
+affInst: Id AFF affect ';'
+;
+
+affect: Id
+| Cste
+| '"' Id '"'
+;
+
 
 param: Id '(' paramOpt ')'
 ;
