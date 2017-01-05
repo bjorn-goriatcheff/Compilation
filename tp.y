@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS CLASS VAR EXTENDS DEF OVERRIDE RETURNS RETURN AS IF THEN ELSE AFF DOT COM ENDCOM ADD SUB MUL QUO NEWW TYPE
+%token IS CLASS VAR EXTENDS DEF OVERRIDE RETURNS RETURN AS IF THEN ELSE AFF DOT COM ENDCOM ADD SUB MUL QUO NEWW TYP
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -27,28 +27,28 @@ Prog : classLOpt block
 ;
 
 classLOpt: 
-classHeader IS blockClass
+|classHeader IS blockClass
 ;
 
-ClassHeader: CLASS Id ListParam BlockClass
+classHeader: CLASS Id listParam blockClass
 ;
 
-listParam: '(' ListParamOpt ')'
+listParam: '(' listParamOpt ')'
 ;
 
-ListParamOpt:
-|Param
+listParamOpt:
+|param
 ;
 
-Param: Arg
-| Arg ',' ListParam
+param: arg
+| arg ',' param
 ;
 
-Arg: Id ':' TYPE
+arg: Id ':' TYP
 ;
 
-BlockClass: '{' ListInst '}'
+blockClass: '{' listInst '}'
 ;
 
-ListInst: 
-| Inst ListInst
+listInst: 
+| Inst listInst
