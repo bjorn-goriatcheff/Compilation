@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS CLASS VAR EXTENDS DEF OVERRIDE RETURNS RETURN AS IF THEN ELSE AFF DOT COM ENDCOM ADD SUB MUL QUO NEWW
+%token IS VAR TYPE CLASS 
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -17,11 +17,43 @@ extern void yyerror(char *);
 %}
 
 %%
-Prog : classLOpt block
+Prog : classLOpt block 
 ;
 
-classLOpt:
+classLOpt: 
+| classHeader IS classBlock
 ;
 
-block:
+block: '{''}'
+
+classBlock: '{' declListOpt '}'
+;
+
+declListOpt: 
+| decl declListOpt
+;
+
+decl: VAR Id ':' TYPE ';'
+
+classHeader: CLASS param initBlockOpt
+;
+
+initBlockOpt: 
+| '{' affList '}' 
+
+affList: aff 
+| aff ';' affList
+
+param: Id '(' paramOpt ')'
+;
+
+paramOpt: 
+| argList
+;
+
+argList: arg
+| arg ',' argList
+;
+
+arg: Id ':' TYPE
 ;
