@@ -59,8 +59,7 @@ affect: Id
 | '"' Id '"'
 ;
 
-
-param: Id '(' paramOpt ')'
+param: TYPE '(' paramOpt ')'
 ;
 
 paramOpt: 
