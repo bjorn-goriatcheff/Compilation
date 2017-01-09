@@ -83,7 +83,6 @@ void lexError(char c) {
 "*"			{return MUL;}
 "/"			{return DV;}
 ":="		{ return(AFF); }
-
 "="			{ yylval.C = EQ; return(RelOp); }
 "<>"		{ yylval.C = NE; return(RelOp); }
 "<="		{ yylval.C = LE; return(RelOp); }

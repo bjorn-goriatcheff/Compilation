@@ -1,4 +1,6 @@
-class A(xc : Integer) {x := xc} is {
+class A(xc : Integer) 
+{x := xc;} 
+is {
 	var x : Integer;
 	
 	def test() : A := this;
@@ -9,5 +11,5 @@ class A(xc : Integer) {x := xc} is {
 	
 	is
 	
-	vc
+	vc;
 }
