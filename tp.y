@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF
+%token IS VAR TYPE CLASS AFF DEF
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -27,7 +27,24 @@ classLOpt:
 block: '{''}'
 ;
 
-classBlock: '{' declListOpt '}'
+classBlock: '{' declListOpt methListOpt'}'
+;
+
+methListOpt:
+| meth methListOpt
+;
+
+meth: methHeader isBlock
+| methHeader isNotBlock
+;
+
+isNotBlock: ':' TYPE AFF expression
+;
+
+isBlock: typeOpt IS block
+;
+
+methHeader: DEF Id '(' paramOpt ')'
 ;
 
 declListOpt: 
@@ -51,10 +68,10 @@ affList: affInst
 | affInst affList
 ;
 
-affInst: Id AFF affect ';'
+affInst: Id AFF expression ';'
 ;
 
-affect: Id
+expression: Id
 | Cste
 | '"' Id '"'
 ;
