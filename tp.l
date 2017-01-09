@@ -22,10 +22,13 @@ NotStarPar      [^*/]
 #include "tp.h"
 #include "tp_y.h"
 
-//extern char *strdup(char *);
+#ifndef __APPLE__
+extern char *strdup(char *);
+#endif
+
 extern YYSTYPE yylval;
-extern int yylineno; // numero de la line
-extern int yylex(); // analyseur lexical
+extern int yylineno; 
+extern int yylex(); 
 
 
 
@@ -39,7 +42,9 @@ int keywordOrId() {
   if (! strcmp(yytext, "class")) return CLASS;
   if (! strcmp(yytext, "is")) return IS;
   if (! strcmp(yytext, "var")) return VAR;
+  if (! strcmp(yytext, "Type")) return TYPE;
   yylval.S = strdup(yytext);
+  return (Id);
 
 }
 
@@ -71,7 +76,12 @@ void lexError(char c) {
 {Entier} 	{ yylval.I = atoi(yytext); return(Cste); }
 {Symbole}	{ return(yytext[0]); }
 {Lettre}{LC}*   { return keywordOrId(); }
+"+"			{return ADD;}
+"-"			{return SUB;}
+"*"			{return MUL;}
+"/"			{return DV;}
 ":="		{ return(AFF); }
+"*/"({NotStar}|{Star}+{NotStarSlash})*{Star}*"*/"{}
 "="			{ yylval.C = EQ; return(RelOp); }
 "<>"		{ yylval.C = NE; return(RelOp); }
 "<="		{ yylval.C = LE; return(RelOp); }
