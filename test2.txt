@@ -1,0 +1,13 @@
+class A(xc : Integer) {x := xc} is {
+	var x : Integer;
+	
+	def test() : A := this;
+}
+
+{
+	var v : Integer := 3;
+	
+	is
+	
+	vc
+}
