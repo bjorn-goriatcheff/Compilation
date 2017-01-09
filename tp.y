@@ -24,7 +24,18 @@ classLOpt:
 | classHeader IS classBlock
 ;
 
-block: '{''}'
+block: '{' instListOpt '}'
+| '{' declList IS instList '}'
+;
+
+instListOpt:
+| instList instListOpt
+;
+
+instList: expression ';' instListOpt
+;
+
+declList: decl declListOpt
 ;
 
 classBlock: '{' declListOpt methListOpt'}'
@@ -38,7 +49,7 @@ meth: methHeader isBlock
 | methHeader isNotBlock
 ;
 
-isNotBlock: ':' TYPE AFF expression
+isNotBlock: ':' TYPE AFF expression ';'
 ;
 
 isBlock: typeOpt IS block
@@ -46,6 +57,7 @@ isBlock: typeOpt IS block
 
 typeOpt: 
 | ':' TYPE AFF
+;
 
 methHeader: DEF Id '(' paramOpt ')'
 ;
@@ -58,7 +70,8 @@ decl: VAR Id ':' TYPE initInstOpt ';'
 ;
 
 initInstOpt:
-| AFF Id
+| AFF expression
+;
 
 classHeader: CLASS param initBlockOpt
 ;
