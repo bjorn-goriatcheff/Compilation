@@ -60,3 +60,45 @@ typedef union
 
 #define YYSTYPE YYSTYPE
 
+//Structures C du code
+typedef struct s_class
+{
+	string className;
+	s_class inheritedClass;
+	
+	int nbClassParameter;
+	s_var *p_classParameter;
+	
+	bool isClassDefined; /*Utile ??? */
+	
+	s_method classConstructor; /* Pourrait être la premiere methode de p_classMethod */
+	s_method *p_classMethod;
+	
+} s_class;
+
+typedef struct s_method
+{
+	string methodName;
+	s_var *p_methodVar;
+	s_class methodType;
+	s_instruction *p_methodInstructions;
+	
+} s_method;
+
+typedef struct s_var
+{
+	string varName;
+	s_class varType;
+} s_var;
+
+typedef struct s_instruction
+{
+	TreeP instructionTree;
+} s_instruction;
+
+//Fonctions pour l'AST
+	//Construction
+TreeP makeLeafStr(short op, char *str); 	    /* feuille (string) */
+TreeP makeLeafInt(short op, int val);	            /* feuille (int) */
+TreeP makeTree(short op, int nbChildren, ...);	    /* noeud interne */
+	//Gestion
