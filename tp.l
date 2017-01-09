@@ -42,7 +42,7 @@ int keywordOrId() {
   if (! strcmp(yytext, "class")) return CLASS;
   if (! strcmp(yytext, "is")) return IS;
   if (! strcmp(yytext, "var")) return VAR;
-  if (! strcmp(yytext, "Type")) return TYPE;
+  if (! strcmp(yytext, "def")) return DEF;
   yylval.S = strdup(yytext);
   return (Id);
 
@@ -75,13 +75,15 @@ void lexError(char c) {
 %%
 {Entier} 	{ yylval.I = atoi(yytext); return(Cste); }
 {Symbole}	{ return(yytext[0]); }
-{Lettre}{LC}*   { return keywordOrId(); }
+{Upper}{LC}*    { return TYPE;}
+{Lower}{LC}*   { return keywordOrId(); }
+{Delim}      {}
 "+"			{return ADD;}
 "-"			{return SUB;}
 "*"			{return MUL;}
 "/"			{return DV;}
 ":="		{ return(AFF); }
-"*/"({NotStar}|{Star}+{NotStarSlash})*{Star}*"*/"{}
+
 "="			{ yylval.C = EQ; return(RelOp); }
 "<>"		{ yylval.C = NE; return(RelOp); }
 "<="		{ yylval.C = LE; return(RelOp); }

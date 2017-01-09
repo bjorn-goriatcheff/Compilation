@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -43,6 +43,9 @@ isNotBlock: ':' TYPE AFF expression
 
 isBlock: typeOpt IS block
 ;
+
+typeOpt: 
+| ':' TYPE AFF
 
 methHeader: DEF Id '(' paramOpt ')'
 ;
