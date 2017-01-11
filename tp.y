@@ -64,7 +64,8 @@ meth: overOpt methHeader isBlock
 | overOpt methHeader isNotBlock
 ;
 
-overOpt: OVERRIDE
+overOpt:
+| OVERRIDE
 ;
 
 isNotBlock: ':' TYPE AFF expression ';'
