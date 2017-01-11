@@ -124,7 +124,7 @@ paramList: expression
 cast: '(' AS TYPE ':' expression ')'
 ;
 
-select: expression.Id
+select: expression '.' Id
 ;
 
 opexpr: expression ADD expression
