@@ -8,13 +8,15 @@ Upper	[A-Z]
 Lettre	[a-zA-Z]
 LC 	({Lettre}|{Chiffre})
 Delim   [ \t\n\r]
-Symbole [&+\-*/();:,.{}]
+Symbole [&();:,.{}]
 BS      \\.
 PasBSG [^\\"]
 Guill		"\""
 Star  		"*"
 NotStar		[^*]
-NotStarPar      [^*/]
+NotStarPar      [^*/] 
+InterieurChaine ({PasBSG}|{BS})
+InterieurChaineComment ({NotStar}|{Star}+{NotStarPar})*{Star}*
 
 %{
 #include <string.h>
@@ -78,15 +80,18 @@ void lexError(char c) {
 {Upper}{LC}*    { return TYPE;}
 {Lower}{LC}*   { return keywordOrId(); }
 {Delim}      {}
+{Guill}{InterieurChaine}*{Guill} {return STRING;}
+"/*"{InterieurChaineComment}"*/" {}
+":="		{ return(AFF); }
+"/"			{return DV;}
 "+"			{return ADD;}
 "-"			{return SUB;}
 "*"			{return MUL;}
-"/"			{return DV;}
-":="		{ return(AFF); }
 "="			{ yylval.C = EQ; return(RelOp); }
 "<>"		{ yylval.C = NE; return(RelOp); }
 "<="		{ yylval.C = LE; return(RelOp); }
 ">="		{ yylval.C = GE; return(RelOp); }
 ">"			{ yylval.C = GT; return(RelOp); }
 "<"			{ yylval.C = LT; return(RelOp); }
+{Symbole}        { return(yytext[0]); }
 %%

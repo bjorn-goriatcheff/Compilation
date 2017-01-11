@@ -99,7 +99,8 @@ expression: Id
 | expression MUL expression
 | '(' expression ')'
 | bexpr
-| UNARY expression
+| ADD expression %prec UNARY 
+| SUB expression %prec UNARY 
 ;
 
 bexpr: expression RelOp expression

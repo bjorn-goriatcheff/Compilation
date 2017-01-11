@@ -11,5 +11,9 @@ is {
 	
 	is
 	
-	vc;
+	"A \sssodod111\"cdcdcd"; /*BLABLABLA 111 ddieie*/
+	
+	3+4>d+3;
+	
+	+d;
 }
