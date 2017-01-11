@@ -68,14 +68,14 @@ overOpt:
 | OVERRIDE
 ;
 
-isNotBlock: ':' TYPE AFF expression ';'
+isNotBlock: ':' TYPE AFF expression
 ;
 
 isBlock: typeOpt IS block
 ;
 
 typeOpt: 
-| ':' TYPE AFF
+| ':' TYPE
 ;
 
 methHeader: DEF Id '(' paramOpt ')'
