@@ -90,6 +90,10 @@ affInst: Id AFF expression ';'
 expression: Id
 | Cste
 | '"' Id '"'
+| expression ADD expression
+| expression SUB expression
+| expression DV expression
+| expression MUL expression
 ;
 
 param: TYPE '(' paramOpt ')'
