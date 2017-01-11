@@ -12,13 +12,14 @@ typedef unsigned char bool;
  * Certains tokens servent directement d'etiquette. Attention ici a ne pas
  * donner des valeurs identiques a celles des tokens.
  */
-#define NE	1
-#define EQ	2
-#define LT	3
-#define LE	4
-#define GT	5
-#define GE	6
-
+#define NE	1 // !=
+#define EQ	2 // ==
+#define LT	3 // <
+#define LE	4 // <=
+#define GT	5 // >
+#define GE	6 // >=
+#define IDVAR 7 //Id en tant que variable d'une methode et non d'un champ
+#define ITE //if then else
 
 /* Codes d'erreurs */
 #define NO_ERROR	0
@@ -98,7 +99,13 @@ typedef struct s_instruction
 
 //Fonctions pour l'AST
 	//Construction
+TreeP makeNode(int nbChildren, short op); // Noeud
 TreeP makeLeafStr(short op, char *str); 	    /* feuille (string) */
 TreeP makeLeafInt(short op, int val);	            /* feuille (int) */
 TreeP makeTree(short op, int nbChildren, ...);	    /* noeud interne */
 	//Gestion
+VarDeclP addToScope(VarDeclP list, VarDeclP nouv);
+VarDeclP declVar(char *name, TreeP tree, VarDeclP decls);
+VarDeclP evalDecls (TreeP tree);
+int eval(TreeP tree, VarDeclP decls);
+int evalMain(TreeP tree, VarDeclP decls);
