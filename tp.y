@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEW
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -110,7 +110,7 @@ expression: Id
 | instanc
 ;
 
-instanc: NEW TYPE '(' paramListOpt ')'
+instanc: NEWW TYPE '(' paramListOpt ')'
 ;
 
 paramListOpt: 
