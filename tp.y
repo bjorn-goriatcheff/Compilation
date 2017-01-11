@@ -29,7 +29,7 @@ classLOpt:
 | classDecl classLOpt
 ;
 
-classDecl: classHeader extOpt IS classBlock
+classDecl: classHeader IS classBlock
 ;
 
 extOpt:
@@ -96,7 +96,7 @@ initInstOpt:
 | AFF expression
 ;
 
-classHeader: CLASS param initBlockOpt
+classHeader: CLASS param extOpt initBlockOpt
 ;
 
 initBlockOpt: 
