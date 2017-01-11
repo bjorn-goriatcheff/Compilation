@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW DOT EXTENDS
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW DOT EXTENDS OVERRIDE
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -60,8 +60,11 @@ methListOpt:
 | meth methListOpt
 ;
 
-meth: methHeader isBlock
-| methHeader isNotBlock
+meth: overOpt methHeader isBlock
+| overOpt methHeader isNotBlock
+;
+
+overOpt: OVERRIDE
 ;
 
 isNotBlock: ':' TYPE AFF expression ';'
