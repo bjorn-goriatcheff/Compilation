@@ -103,7 +103,7 @@ affList: affInst
 | affInst affList
 ;
 
-affInst: Id AFF expression ';'
+affInst: expression AFF expression ';'
 ;
 
 expression: Id
