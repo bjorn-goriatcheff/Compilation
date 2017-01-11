@@ -51,7 +51,7 @@ inst: expression ';'
 | block
 | RETURN ';'
 | affInst
-| IF expression THEN inst ELSE inst
+| IF bexpr THEN inst ELSE inst
 ;
 
 declList: decl declListOpt
