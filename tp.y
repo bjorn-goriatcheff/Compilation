@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW DOT
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW DOT EXTENDS
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -25,7 +25,11 @@ Prog : classLOpt block
 ;
 
 classLOpt: 
-| classHeader IS classBlock
+| classHeader extOpt IS classBlock
+;
+
+extOpt:
+| EXTENDS TYPE '(' paramListOpt ')'
 ;
 
 block: '{' instListOpt '}'
@@ -109,6 +113,10 @@ expression: Id
 | select
 | cast
 | instanc
+| message
+;
+
+message: expression DOT Id '(' paramListOpt ')'
 ;
 
 instanc: NEWW TYPE '(' paramListOpt ')'
