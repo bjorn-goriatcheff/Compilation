@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW DOT EXTENDS OVERRIDE
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW DOT EXTENDS OVERRIDE AND
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -10,6 +10,7 @@
 %left ADD SUB
 %left MUL DV
 %right UNARY
+%left AND
 %left DOT
 
 %{
@@ -110,6 +111,7 @@ expression: Id
 | Cste
 | STRING
 | opexpr
+| expression AND expression
 | '(' expression ')'
 | bexpr
 | ADD expression %prec UNARY 
