@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -30,7 +30,7 @@ block: '{' instListOpt '}'
 ;
 
 instListOpt:
-| instList instListOpt
+| instList
 ;
 
 instList: expression ';' instListOpt
@@ -90,7 +90,7 @@ affInst: Id AFF expression ';'
 
 expression: Id
 | Cste
-| '"' Id '"'
+| STRING
 | expression ADD expression
 | expression SUB expression
 | expression DV expression
