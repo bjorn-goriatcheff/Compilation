@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEW
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -35,7 +35,14 @@ instListOpt:
 | instList
 ;
 
-instList: expression ';' instListOpt
+instList: inst instListOpt
+;
+
+inst: expression ';'
+| block
+| RETURN ';'
+| affInst
+| IF expression THEN inst ELSE inst
 ;
 
 declList: decl declListOpt
@@ -93,14 +100,37 @@ affInst: Id AFF expression ';'
 expression: Id
 | Cste
 | STRING
-| expression ADD expression
-| expression SUB expression
-| expression DV expression
-| expression MUL expression
+| opexpr
 | '(' expression ')'
 | bexpr
 | ADD expression %prec UNARY 
 | SUB expression %prec UNARY 
+| select
+| cast
+| instanc
+;
+
+instanc: NEW TYPE '(' paramListOpt ')'
+;
+
+paramListOpt: 
+| paramList paramListOpt
+;
+
+paramList: expression
+| expression ',' paramList
+;
+
+cast: '(' AS TYPE ':' expression ')'
+;
+
+select: expression.Id
+;
+
+opexpr: expression ADD expression
+| expression SUB expression
+| expression MUL expression
+| expression DV expression
 ;
 
 bexpr: expression RelOp expression
