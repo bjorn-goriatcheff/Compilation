@@ -6,6 +6,7 @@
 
 
 /* Indications de precedence */
+%nonassoc RelOp
 %left ADD SUB
 %left MUL DV
 
