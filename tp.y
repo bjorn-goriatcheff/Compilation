@@ -51,7 +51,7 @@ inst: expression ';'
 | block
 | RETURN ';'
 | affInst
-| IF bexpr THEN inst ELSE inst
+| IF expression THEN inst ELSE inst
 ;
 
 declList: decl declListOpt
@@ -100,14 +100,7 @@ classHeader: CLASS param initBlockOpt
 ;
 
 initBlockOpt: 
-| '{' affList '}'
-; 
-
-affList: affInst 
-| affInst affList
-;
-
-affInst: expression AFF expression ';'
+| block
 ;
 
 expression: Id
