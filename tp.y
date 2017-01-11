@@ -115,7 +115,7 @@ instanc: NEWW TYPE '(' paramListOpt ')'
 ;
 
 paramListOpt: 
-| paramList paramListOpt
+| paramList
 ;
 
 paramList: expression
