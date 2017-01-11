@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -9,6 +9,7 @@
 %nonassoc RelOp
 %left ADD SUB
 %left MUL DV
+%right UNARY
 
 %{
 #include "tp.h"
@@ -98,6 +99,7 @@ expression: Id
 | expression MUL expression
 | '(' expression ')'
 | bexpr
+| UNARY expression
 ;
 
 bexpr: expression RelOp expression
