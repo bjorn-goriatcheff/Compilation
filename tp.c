@@ -103,16 +103,17 @@ TreeP makeNode(int nbChildren, short op) {
 
 
 /* Construction d'un arbre a nbChildren branches, passees en parametres */
-TreeP makeTree(short op, int nbChildren, ...) {
-  va_list args;
-  int i;
-  TreeP tree = makeNode(nbChildren, op); 
-  va_start(args, nbChildren);
-  for (i = 0; i < nbChildren; i++) { 
-    tree->u.children[i] = va_arg(args, TreeP);
-  }
-  va_end(args);
-  return(tree);
+TreeP makeTree(short op, int nbChildren, ...) 
+{
+	va_list args;
+	int i;
+	TreeP tree = makeNode(nbChildren, op); 
+	va_start(args, nbChildren);
+	for (i = 0; i < nbChildren; i++) { 
+	tree->u.children[i] = va_arg(args, TreeP);
+	}
+	va_end(args);
+	return(tree);
 }
 
 
@@ -137,7 +138,7 @@ void setChild(TreeP tree, int rank, TreeP arg) {
 
 /* Constructeur de feuille dont la valeur est une chaine de caracteres */
 TreeP makeLeafStr(short op, char *str) {
-  TreeP tree = makeNode(0, op);
+  TreeP tree = makeNode(0,op);
   tree->u.str = str;
   return tree;
 }
@@ -145,14 +146,196 @@ TreeP makeLeafStr(short op, char *str) {
 
 /* Constructeur de feuille dont la valeur est un entier */
 TreeP makeLeafInt(short op, int val) {
-  TreeP tree = makeNode(0, op); 
+  TreeP tree = makeNode(0, op) ;
   tree->u.val = val;
   return(tree);
 }
 
 TreeP makeLeafLVar(short op, VarDeclP lvar) {
-  TreeP tree = makeNode(0, op); 
+  TreeP tree = makeNode(0, op) ;
   tree->u.lvar = lvar;
   return(tree);
 }
 
+
+/* Avant evaluation, verifie si tout identificateur qui apparait dans tree a
+ * bien ete declare (dans ce cas il doit etre dans la liste lvar).
+ * On impose que ca soit le cas y compris si on n'a pas besoin de cet
+ * identificateur pour l'evaluation, comme par exemple x dans
+ * begin if 1 = 1 then 1 else x end
+ * Le champ 'val' de la structure VarDecl n'est pas significatif
+ * puisqu'on n'a encore rien evalue.
+ */
+ 
+ //Gérer s'il s'agit d'une variable locale ou d'un champ. Genre créer un truc IdRes
+bool checkScope(TreeP tree, VarDeclP lvar) {
+	VarDeclP p; 
+	char *name;
+	if (tree == NIL(Tree)) { return TRUE; }
+	switch (tree->op) 
+	{
+		case IDVAR : case Id:
+			/* verifie si la variable existe dans 'lvar' ou pas */
+			name = tree->u.str;
+			for(p=lvar; p != NIL(VarDecl); p = p->next) 
+			{
+				if (strcmp(p->name, name)==0) { return TRUE; }
+			}
+			fprintf(stderr, "\nError: undeclared variable %s\n", name);
+			/* setError met noEval a true de facon à bloquer les evaluations
+			* ulterieures, sinon on pourrait chercher la valeur d'une variable qui
+			* n'existe pas
+			*/
+			setError(CONTEXT_ERROR);
+			return FALSE;
+		case Cste:	//OK : pas besoin de vérifier
+			return TRUE;
+		case ITE:	//OK : on vérifie les 3 champs du ITE
+			return checkScope(getChild(tree, 0), lvar) /* la condition */
+				&& checkScope(getChild(tree, 1), lvar) /* la partie 'then' */
+				&& checkScope(getChild(tree, 2), lvar); /* la partie 'else' */
+		case EQ: case NE: case GT: case GE: case LT: case LE: 
+		case EADD: case EMINUS: case EMULT: case EDIV:
+			return checkScope(getChild(tree, 0), lvar) 
+				&& checkScope(getChild(tree, 1), lvar);
+		default: 
+			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
+			exit(UNEXPECTED);
+	}
+}
+
+/* Associe une variable a l'expression qui definit sa valeur, et procede a 
+ * l'evaluation de cette expression, sauf si on est en mode noEval
+ */
+VarDeclP declVar(char *name, TreeP tree, VarDeclP decls) 
+{
+	VarDeclP pvar = NEW(1, VarDecl);
+	pvar->name = name; 
+	pvar->next = NIL(VarDecl);
+	/* verifie que l'AST ne mentionne pas de variable non declaree */
+	checkScope(tree, decls);
+	/* puis evalue l'expression en recherchant la valeur des variables dans la
+	* liste representee par 'decls'. Vu la verification precedente, la
+	* recherche ne pourra pas echouer.
+	*/
+	if (! noEval) 	{ pvar->val = eval(tree, decls); }
+
+	/* ajoute le cnouveau couple variable/valeur en tete de la liste coruante et
+	* la renvoie en resultat. Verifie en meme temps que cette variable n'a pas
+	* deja ete declaree
+	*/
+	return addToScope(decls, pvar);
+}
+
+
+
+/* eval: parcours recursif de l'AST d'une expression en cherchant dans
+ * l'environnement la valeur des variables referencee
+ * tree: l'AST d'une expression
+ * decls: la liste des variables deja declarées avec leur valeur.
+ */
+int eval(TreeP tree, VarDeclP decls) {
+	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
+	switch (tree->op) 
+	{
+		case IDVAR: case Id:
+			return getValue(tree, decls);
+		case Cste:
+			return(tree->u.val);
+		case EQ:
+			return (eval(getChild(tree, 0), decls) == eval(getChild(tree, 1), decls));
+		case NE:
+			return (eval(getChild(tree, 0), decls) != eval(getChild(tree, 1), decls));
+		case GT:
+			return (eval(getChild(tree, 0), decls) > eval(getChild(tree, 1), decls));
+		case GE:
+			return (eval(getChild(tree, 0), decls) >= eval(getChild(tree, 1), decls));
+		case LT:
+			return (eval(getChild(tree, 0), decls) < eval(getChild(tree, 1), decls));
+		case LE:
+			return (eval(getChild(tree, 0), decls) <= eval(getChild(tree, 1), decls));
+		case EADD:
+			return (eval(getChild(tree, 0), decls) + eval(getChild(tree, 1), decls));
+		case EMINUS:
+			return (eval(getChild(tree, 0), decls) - eval(getChild(tree, 1), decls));
+		case EMULT:
+			return (eval(getChild(tree, 0), decls) * eval(getChild(tree, 1), decls));
+		case EDIV:
+		{
+			if (eval(getChild(tree,1), decls) == 0) {
+				fprintf(stderr, "Error: Division by zero\n"); exit(EVAL_ERROR);
+			} 
+			else { return ( eval(getChild(tree,0), decls)/ eval(getChild(tree,1), decls) ); }
+		}
+		case ITE:
+			return evalIf(tree, decls);
+		default: 
+			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
+			exit(UNEXPECTED);
+	}
+}
+
+
+/* Evaluation d'un if then else 
+ * le premier fils represente la condition,
+ * les deux autres fils correspondent respectivement aux parties then et else.
+ * Attention a n'evaluer qu'un seul de ces deux sous-arbres !
+ */
+int evalIf(TreeP tree, VarDeclP decls)
+{
+	if (eval(getChild(tree, 0), decls)) {
+		return eval(getChild(tree, 1), decls);
+	}	 
+	else { return eval(getChild(tree, 2), decls); }
+}
+
+
+/* retourne la valeur d'une variable: 'tree' correspond a une feuille qui
+ * represente un identificateur. decls est la liste courante des couples
+ * (variable, valeur). On est suppose avoir deja verifie que l'identificateur
+ * etait bien declare, donc on doit trouver sa valeur.
+ */
+int getValue(TreeP tree, VarDeclP decls) {
+	char *name = tree->u.str;
+	while (decls != NIL(VarDecl)) {
+		if (strcmp(decls->name, name)==0) return(tree->u.val);
+		decls = decls->next;
+	}
+	/* Cannot happen if variables have been checked before evaluation.
+	* In the presence of undeclared variables, errorCode was set to
+	* CONTEXT_ERROR by function checkScope.
+	*/
+	if (errorCode == NO_ERROR) {
+		fprintf(stderr, "Unexpected error: Undeclared variable %s\n", name);
+		exit(UNEXPECTED);
+	} 
+	else {
+	/* Value does not matter, evaluation is blocked anyhow and getValue
+	 * will never be called in that case. 
+	 * Hence this is dead code, needed only to prevent gcc from complaining
+	 * about having a non-void function not returning a value !
+	 */
+	return -1;
+	}
+}
+
+
+/* Verifie que nouv n'apparait pas deja dans list. l'ajoute en tete et
+ * renvoie la nouvelle liste
+ */
+VarDeclP addToScope(VarDeclP list, VarDeclP nouv) {
+  VarDeclP p;
+  for(p=list; p != NIL(VarDecl); p = p->next) {
+    if (strcmp(p->name, nouv->name)==0) {
+      fprintf(stderr, "Error: Multiple declaration in the same scope of %s\n",
+	      p->name);
+      setError(CONTEXT_ERROR);
+      break;
+    }
+  }
+  /* On continue meme en cas de double declaration, pour pouvoir eventuellement
+   * detecter plus d'une erreur
+   */
+  nouv->next=list;
+  return nouv;
+}
