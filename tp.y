@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW
+%token IS VAR TYPE CLASS AFF DEF ADD SUB MUL DV STRING UNARY AS RETURN IF THEN ELSE NEWW DOT
 %token<S> Id
 %token<I> Cste
 %token<C> RelOp
@@ -10,6 +10,7 @@
 %left ADD SUB
 %left MUL DV
 %right UNARY
+%left DOT
 
 %{
 #include "tp.h"
@@ -124,7 +125,7 @@ paramList: expression
 cast: '(' AS TYPE ':' expression ')'
 ;
 
-select: expression '.' Id
+select: expression DOT Id
 ;
 
 opexpr: expression ADD expression
