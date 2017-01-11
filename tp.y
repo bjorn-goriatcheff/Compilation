@@ -101,6 +101,8 @@ classHeader: CLASS param initBlockOpt
 
 initBlockOpt: 
 | block
+
+affInst: expression AFF expression ';'
 ;
 
 expression: Id
