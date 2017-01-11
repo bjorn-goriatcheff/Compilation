@@ -95,6 +95,11 @@ expression: Id
 | expression SUB expression
 | expression DV expression
 | expression MUL expression
+| '(' expression ')'
+| bexpr
+;
+
+bexpr: expression RelOp expression
 ;
 
 param: TYPE '(' paramOpt ')'
