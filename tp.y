@@ -26,7 +26,10 @@ Prog : classLOpt block
 ;
 
 classLOpt: 
-| classHeader extOpt IS classBlock
+| classDecl classLOpt
+;
+
+classDecl: classHeader extOpt IS classBlock
 ;
 
 extOpt:
