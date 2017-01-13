@@ -78,7 +78,7 @@ struct _VarDecl {
   ClassP varType;
   TreeP expr;
   int val;
-  struct _varDecl *next;
+  struct _VarDecl *next;
 };
 
 struct _Arg {
