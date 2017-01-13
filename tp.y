@@ -13,6 +13,8 @@
 %left AND
 %left DOT
 
+%type <pT> expression opexpr bexpr
+
 %{
 #include "tp.h"
 #include "tp_y.h"
@@ -105,14 +107,14 @@ initBlockOpt:
 affInst: expression AFF expression ';'
 ;
 
-expression: Id
-| Cste
-| STRING
+expression: Id 				{ $$ = makeLeafStr(IDVAR, $1) }
+| Cste 					{ $$ = makeLeafInt(CONST, $1) }
+| STRING			
 | opexpr
 | expression AND expression
 | '(' expression ')'
 | bexpr
-| ADD expression %prec UNARY 
+| ADD expression %prec UNARY 		{ $$ = $2 }
 | SUB expression %prec UNARY 
 | select
 | cast
@@ -137,19 +139,19 @@ paramList: expression
 cast: '(' AS TYPE ':' expression ')'
 ;
 
-select: expression DOT Id
+select: expression DOT Id 
 ;
 
-opexpr: expression ADD expression
-| expression SUB expression
-| expression MUL expression
-| expression DV expression
+opexpr: expression ADD expression		{ $$ = makeTree(EADD, 2, $1, $3) }
+| expression SUB expression 			{ $$ = makeTree(EMINUS, 2, $1, $3) }
+| expression MUL expression 			{ $$ = makeTree(EMUL, 2, $1, $3) }
+| expression DV expression 			{ $$ = makeTree(EDIV, 2, $1, $3) }
 ;
 
-bexpr: expression RelOp expression
+bexpr: expression RelOp expression 		{ $$ = makeTree($2, 2, $1, $3) }
 ;
 
-param: TYPE '(' paramOpt ')'
+param: TYPE '(' paramOpt ')' 			{}
 ;
 
 paramOpt: 
@@ -160,5 +162,5 @@ argList: arg
 | arg ',' argList
 ;
 
-arg: Id ':' TYPE
+arg: Id ':' TYPE 
 ;
