@@ -8,7 +8,7 @@ Upper	[A-Z]
 Lettre	[a-zA-Z]
 LC 	({Lettre}|{Chiffre})
 Delim   [ \t\n\r]
-Symbole [&();:,.{}]
+Symbole [();:,{}]
 BS      \\.
 PasBSG [^\\"]
 Guill		"\""
@@ -41,10 +41,18 @@ extern int errorCode;
 
 int keywordOrId() { 
   /* a completer */
-  if (! strcmp(yytext, "class")) return CLASS;
-  if (! strcmp(yytext, "is")) return IS;
-  if (! strcmp(yytext, "var")) return VAR;
-  if (! strcmp(yytext, "def")) return DEF;
+  if (! strcmp(yytext, "class")) return (CLASS);
+  if (! strcmp(yytext, "is")) return (IS);
+  if (! strcmp(yytext, "var")) return (VAR);
+  if (! strcmp(yytext, "def")) return (DEF);
+  if (! strcmp(yytext, "as")) return (AS);
+  if (! strcmp(yytext, "new")) return (NEWW);
+  if (! strcmp(yytext, "if"))    return(IF);
+  if (! strcmp(yytext, "then"))  return(THEN);
+  if (! strcmp(yytext, "else"))  return(ELSE);
+  if (! strcmp(yytext, "return"))  return(RETURN);
+  if (! strcmp(yytext, "extends"))  return(EXTENDS);
+  if (! strcmp(yytext, "override"))  return(OVERRIDE);
   yylval.S = strdup(yytext);
   return (Id);
 
@@ -82,16 +90,18 @@ void lexError(char c) {
 {Delim}      {}
 {Guill}{InterieurChaine}*{Guill} {return STRING;}
 "/*"{InterieurChaineComment}"*/" {}
+"." {return(DOT);}
 ":="		{ return(AFF); }
 "/"			{return DV;}
 "+"			{return ADD;}
 "-"			{return SUB;}
 "*"			{return MUL;}
+"&"			{return AND;} 		
 "="			{ yylval.C = EQ; return(RelOp); }
 "<>"		{ yylval.C = NE; return(RelOp); }
 "<="		{ yylval.C = LE; return(RelOp); }
 ">="		{ yylval.C = GE; return(RelOp); }
 ">"			{ yylval.C = GT; return(RelOp); }
 "<"			{ yylval.C = LT; return(RelOp); }
-{Symbole}        { return(yytext[0]); }
+
 %%
