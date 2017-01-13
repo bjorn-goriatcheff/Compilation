@@ -1,0 +1,5 @@
+class A(xc : Integer) {x := xc} is {
+	var x : Integer;
+}
+
+{}
