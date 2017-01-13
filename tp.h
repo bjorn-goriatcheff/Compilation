@@ -31,6 +31,8 @@ typedef unsigned char bool;
 #define EDIV 12
 #define CONST 13
 #define ESTR 14
+#define OP 15
+#define CONCA 16
 
 
 /* Codes d'erreurs */
