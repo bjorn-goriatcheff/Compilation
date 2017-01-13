@@ -29,6 +29,8 @@ typedef unsigned char bool;
 #define EMINUS 10
 #define EMULT 11
 #define EDIV 12
+#define CONST 13
+#define ESTR 14
 
 /* Codes d'erreurs */
 #define NO_ERROR	0
