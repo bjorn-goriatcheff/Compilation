@@ -91,7 +91,6 @@ struct _Arg {
 };
 
 struct _Block {
-	char* name;
 	VarDeclP decl;
 	TreeP instr;
 };
@@ -150,4 +149,13 @@ int evalMain(TreeP tree, VarDeclP decls);
 int evalIf(TreeP tree,VarDeclP decls);
 bool isMethodInClass(Class cl, Method met);
 int getValue(TreeP tree, VarDeclP var);
+
+//Remplissage de structures
+ClassP makeClass(char *name, VarDeclP var, MethodP method, MethodP constructor, ...);
+//VarDeclP makeVar(char *name, ClassP varType);
+MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type);
+BlockP makeBlock(VarDeclP decl, TreeP instr);
+ArgP makeArg(char* name, ClassP type);
+
+
 #endif
