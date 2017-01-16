@@ -1,6 +1,9 @@
+#ifndef _TP_H_
+#define _TP_H_
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
+
 
 #define TRUE 1
 #define FALSE 0
@@ -14,9 +17,9 @@ typedef unsigned char bool;
  * Certains tokens servent directement d'etiquette. Attention ici a ne pas
  * donner des valeurs identiques a celles des tokens.
  */
-#define NE	1 // !=
-#define EQ	2 // ==
-#define LT	3 // <
+#define NE	1 /* !=*/
+#define EQ	2 /* ==*/
+#define LT	3 /* <*/
 #define LE	4 // <=
 #define GT	5 // >
 #define GE	6 // >=
@@ -26,6 +29,11 @@ typedef unsigned char bool;
 #define EMINUS 10
 #define EMULT 11
 #define EDIV 12
+#define CONST 13
+#define ESTR 14
+#define OP 15
+#define CONCA 16
+
 
 /* Codes d'erreurs */
 #define NO_ERROR	0
@@ -38,27 +46,74 @@ typedef unsigned char bool;
 #define EVAL_ERROR	50
 #define UNEXPECTED	100
 
-typedef struct _varDecl {
-  char *name;
-  s_class varType;
-  struct _varDecl *next;
-  int val;
-} VarDecl, *VarDeclP;
+struct _Tree;
+typedef struct _Tree Tree, *TreeP;
 
+struct _VarDecl;
+typedef struct _VarDecl VarDecl, *VarDeclP;
+
+struct _Arg;
+typedef struct _Arg Arg, *ArgP;
+
+struct _Block;
+typedef struct _Block Block, *BlockP;
+
+struct _Method;
+typedef struct _Method Method, *MethodP;
+
+struct _Class;
+typedef struct _Class Class, *ClassP;
 
 /* la structure d'un arbre (noeud ou feuille) */
-typedef struct _Tree {
+struct _Tree {
   short op;         /* etiquette de l'operateur courant */
   short nbChildren; /* nombre de sous-arbres */
   union {
     char *str;      /* valeur de la feuille si op = Id ou STR */
     int val;        /* valeur de la feuille si op = Cste */
     VarDeclP lvar;
-	s_class classe;
-	s_method method;
     struct _Tree **children; /* tableau des sous-arbres */
   } u;
-} Tree, *TreeP;
+};
+
+struct _VarDecl {
+  char *name;
+  ClassP varType;
+  TreeP expr;
+  int val;
+  struct _VarDecl *next;
+};
+
+struct _Arg {
+	char* name;
+	ClassP type;
+	struct _Arg *next;
+};
+
+struct _Block {
+	VarDeclP decl;
+	TreeP instr;
+};
+
+struct _Method {
+	char* name;
+	ArgP args;
+	BlockP body;
+	ClassP type;
+	struct _Method *next;
+};
+
+
+
+struct _Class {
+	char *name;
+	VarDeclP var;
+	MethodP method;
+	MethodP constructor;
+	struct _Class *super;
+	struct _Class *next;
+};
+
 
 
 typedef union
@@ -67,48 +122,14 @@ typedef union
 	int I;
 	TreeP pT;
 	VarDeclP pV;
-	s_class pC;
-	s_method pM;
+	ClassP pC;
+	MethodP pM;
 } YYSTYPE;
 
 #define YYSTYPE YYSTYPE
 
-//Structures C du code
-typedef struct s_class
-{
-	string className;
-	s_class fromClass;
-	
-	s_var *p_classParameter;
-
-	s_method classConstructor; /* Pourrait être la premiere methode de p_classMethod */
-	s_method *p_classMethod;
-	
-	s_class *suivant;
-	
-} s_class;
 
 
-typedef struct s_method
-{
-	string methodName;
-	s_var *p_methodVar;
-	s_class methodHome;
-	s_class methodType;
-	s_instruction *p_methodInstructions;
-	s_method suivant;
-} s_method;
-
-typedef struct s_var
-{
-	string varName;
-	s_class varType;
-} s_var;
-
-typedef struct s_instruction
-{
-	TreeP instructionTree;
-} s_instruction;
 
 //Fonctions pour l'AST
 	//Construction
@@ -116,14 +137,24 @@ TreeP makeNode(int nbChildren, short op); // Noeud
 TreeP makeLeafStr(short op, char *str); 	    /* feuille (string) */
 TreeP makeLeafInt(short op, int val);	            /* feuille (int) */
 TreeP makeTree(short op, int nbChildren, ...);	    /* noeud interne */
-//TreeP makeLeafClass(short op, s_class classe);
-//TreeP makeLeafMethod(short op, s_method met);
+TreeP getChild(TreeP tree, int rank);
+void setChild(TreeP tree, int rank, TreeP arg);
 
 	//Gestion
 VarDeclP addToScope(VarDeclP list, VarDeclP nouv);
 VarDeclP declVar(char *name, TreeP tree, VarDeclP decls);
 VarDeclP evalDecls (TreeP tree);
 int eval(TreeP tree, VarDeclP decls);
-int evalMain(TreeP tree, VarDeclP decls);
-int evalIf(TreeP tree,VarDeclP decls);
-bool isMethodInClass(s_class cl, s_method met);
+int evalIte(TreeP tree,VarDeclP decls);
+bool isMethodInClass(Class cl, Method met);
+int getValue(TreeP tree, VarDeclP var);
+void printTree(TreeP tree);
+
+ClassP makeClass(char *name, VarDeclP var, MethodP method, MethodP constructor, ...);
+//VarDeclP makeVar(char *name, ClassP varType);
+MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type);
+BlockP makeBlock(VarDeclP decl, TreeP instr);
+ArgP makeArg(char* name, ClassP type);
+
+
+#endif

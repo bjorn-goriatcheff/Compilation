@@ -23,12 +23,15 @@ bool debug = FALSE;
 /* code d'erreur a retourner */
 int errorCode = NO_ERROR;
 
+/* Evaluation ou pas. Par defaut, on evalue les expressions */
+bool noEval = FALSE;
+
 FILE *out; /* fichier de sortie pour le code engendre */
 
 
 int main(int argc, char **argv)
 {
-	p_listClass = NULL;
+	
 	
   int fi;
   int i, res;
@@ -68,6 +71,41 @@ int main(int argc, char **argv)
     fprintf(stderr, "erreur: Cannot open %s\n", argv[i-1]);
     exit(USAGE_ERROR);
   }
+
+////////////////////////////////////// TEST //////////////////////////////////////////
+	printf("\t\ttest dans main\n\n");
+
+	TreeP t1, t11, t12 = NEW(1,Tree);
+	TreeP t2, t21, t22   = NEW(1,Tree);
+	TreeP t3, t31, t32  = NEW(1,Tree);
+	TreeP T = NEW(1,Tree);
+ 
+	t11=makeLeafInt(Cste, 1);
+	t12=makeLeafInt(Cste,1);
+	t1=makeTree(EQ,2,t11,t12);
+	
+	t2 =makeNode(2, EADD);
+	t21=makeLeafInt(Cste,2);
+	t22=makeLeafInt(Cste,2);
+	setChild(t2,0,t21);
+	setChild(t2,1,t22);
+	
+	t3 =makeNode(2, EMINUS);
+	t31=makeLeafInt(Cste,3);
+	t32=makeLeafInt(Cste,3);
+	setChild(t3,0,t31);
+	setChild(t3,1,t32);;
+
+	T=makeNode(3, ITE);	
+	setChild(T,0,t1);
+	setChild(T,1,t2);
+	setChild(T,2,t3);
+	/*T=makeNode(2, EQ);	
+	setChild(T,0,t11);
+	setChild(T,1,t3);*/
+
+
+	printTree(T);
 
   /* redirige l'entree standard sur le fichier... */
   close(0); dup(fi); close(fi);
@@ -159,18 +197,6 @@ TreeP makeLeafLVar(short op, VarDeclP lvar) {
   return(tree);
 }
 
-		//Utiles ??
-//TreeP makeLeafClass(short op, s_class classe){
-// TreeP tree = makeNode(0, op);
- // tree->u.classe = classe;
-//  return(tree);
-//}
-//TreeP makeLeafMeth(short op, s_method met){
- //TreeP tree = makeNode(0, op);
- // tree->u.method = met;
- // return(tree);
-//}
-
 /* Avant evaluation, verifie si tout identificateur qui apparait dans tree a
  * bien ete declare (dans ce cas il doit etre dans la liste lvar).
  * On impose que ca soit le cas y compris si on n'a pas besoin de cet
@@ -199,14 +225,40 @@ bool checkScope(TreeP tree, VarDeclP lvar) {
 			*/
 			setError(CONTEXT_ERROR);
 			return FALSE;
-		case Cste:	//OK : pas besoin de vérifier
+		case Cste:	/*OK : pas besoin de vérifier*/
 			return TRUE;
-		case ITE:	//OK : on vérifie les 3 champs du ITE
+		case ITE:	/*OK : on vérifie les 3 champs du ITE*/
 			return checkScope(getChild(tree, 0), lvar) /* la condition */
 				&& checkScope(getChild(tree, 1), lvar) /* la partie 'then' */
 				&& checkScope(getChild(tree, 2), lvar); /* la partie 'else' */
-		case EQ: case NE: case GT: case GE: case LT: case LE:
-		case EADD: case EMINUS: case EMULT: case EDIV:
+		case EQ: 
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case NE:
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case GT: 
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case GE: 
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case LT: 
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case LE:
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case EADD: 
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case EMINUS: 
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case EMULT: 
+			return checkScope(getChild(tree, 0), lvar)
+				&& checkScope(getChild(tree, 1), lvar);
+		case EDIV:
 			return checkScope(getChild(tree, 0), lvar)
 				&& checkScope(getChild(tree, 1), lvar);
 		default:
@@ -249,7 +301,9 @@ int eval(TreeP tree, VarDeclP decls) {
 	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
 	switch (tree->op)
 	{
-		case IDVAR: case Id:
+		case IDVAR: 
+			return getValue(tree, decls);
+		case Id:
 			return getValue(tree, decls);
 		case Cste:
 			return(tree->u.val);
@@ -279,7 +333,7 @@ int eval(TreeP tree, VarDeclP decls) {
 			else { return ( eval(getChild(tree,0), decls)/ eval(getChild(tree,1), decls) ); }
 		}
 		case ITE:
-			return evalIf(tree, decls);
+			return evalIte(tree, decls);
 		default:
 			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
 			exit(UNEXPECTED);
@@ -292,7 +346,7 @@ int eval(TreeP tree, VarDeclP decls) {
  * les deux autres fils correspondent respectivement aux parties then et else.
  * Attention a n'evaluer qu'un seul de ces deux sous-arbres !
  */
-int evalIf(TreeP tree, VarDeclP decls)
+int evalIte(TreeP tree, VarDeclP decls)
 {
 	if (eval(getChild(tree, 0), decls)) {
 		return eval(getChild(tree, 1), decls);
@@ -351,15 +405,134 @@ VarDeclP addToScope(VarDeclP list, VarDeclP nouv) {
 }
 
 
-//bool isMethodInClass(s_class cl, s_method met)
-//{
-//	if(cl==NULL || met==NULL)	[return FALSE;};
-//	s_method tmp;
-//	tmp=cl->p_classMethod;
-//	while(tmp!=NULL && strcmp(tmp->methodName, met->methodName)!=0)
-//	{
-//		tmp=tmp->suivant;
-//	}
-//	if(tmp==NULL)	{ return FALSE; }
-//	return TRUE;
-//}	
+/*bool isMethodInClass(s_class cl, s_method met)
+{
+	if(cl==NULL || met==NULL)	[return FALSE;};
+	s_method tmp;
+	tmp=cl->p_classMethod;
+	while(tmp!=NULL && strcmp(tmp->methodName, met->methodName)!=0)
+	{
+		tmp=tmp->suivant;
+	}
+	if(tmp==NULL)	{ return FALSE; }
+	return TRUE;
+}*/	
+
+
+
+/* tree : l'ast d'une expression 
+ * d : liste des variables déjà déclarées avec une valeur
+*/
+void printTree(TreeP tree)
+{
+	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
+	switch (tree->op)
+	{
+		case IDVAR: 
+			printf("IDVAR: %s ", tree->u.str);
+			break;
+		case Id:
+			printf("Id: %s ", tree->u.str);
+			break;
+		case Cste : 
+			printf("Cste: %d ", tree->u.val);
+			break;
+		case EQ: 
+			printf("\nEQ: ");
+			printTree(getChild(tree,0));
+			printf("  ,  ");	
+			printTree(getChild(tree,1));
+			break;
+		case NE: 
+			printf("\nNE: ");
+			printTree(getChild(tree,0));
+			printf("\t");	
+			printTree(getChild(tree,1));
+			break;
+		case LT : 
+			printf("\nLT: ");
+			printTree(getChild(tree,0));
+			printf("\t");	
+			printTree(getChild(tree,1));
+			break;
+		case LE: 
+			printf("\nLE: ");
+			printTree(getChild(tree,0));
+			printf("\t");	
+			printTree(getChild(tree,1));
+			break;
+		case GT:
+			printf("\nGT: ");
+			printTree(getChild(tree,0));
+			printf("\t");	
+			printTree(getChild(tree,1));
+			break;
+		case GE :
+			printf("\nGE: ");
+			printTree(getChild(tree,0));
+			printf("\t");	
+			printTree(getChild(tree,1));
+			break;
+		case ITE : 
+			printf("\nITE: ");
+			printTree(getChild(tree,0));
+			printf("\t");	
+			printTree(getChild(tree,1));
+			printf("\t");
+			printTree(getChild(tree,2));
+			break;
+		case EADD: case EMINUS:  case EMULT : case EDIV : 
+			printf("\nADD/MIN/MULT/DIV: ");
+			printTree(getChild(tree,0));
+			printf("\t");	
+			printTree(getChild(tree,1));
+			break;
+		default:
+			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
+			exit(UNEXPECTED);
+	}
+}
+
+MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type)
+{
+	MethodP m = NEW(1,Method);
+	m->name=name;
+	m->args = args;
+	m->body = body; 
+	m->type = type;
+	m->next=NULL;
+	return m;
+}
+
+ArgP makeArg(char* name, ClassP type)
+{
+	ArgP arg = NEW(1,Arg);
+	arg->name=name;
+	arg->type=type;
+	arg->next=NULL;
+	return arg;
+}
+
+BlockP makeBlock(VarDeclP decl, TreeP instr)
+{
+	BlockP b = NEW(1,Block);
+	b->decl=decl;
+	b->instr=instr;
+	return b;
+}
+
+ClassP makeClass(char *name, VarDeclP var, MethodP method, MethodP constructor, ...)
+{
+	ClassP c = NEW(1,Class);
+	c->name = name;
+	c->var=var;
+	c->method = method;
+	c->constructor = constructor;
+	c->next=NULL;	
+	return c;
+}
+
+
+
+
+
