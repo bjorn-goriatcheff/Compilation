@@ -91,7 +91,6 @@ struct _Arg {
 };
 
 struct _Block {
-	char* name;
 	VarDeclP decl;
 	TreeP instr;
 };
