@@ -148,6 +148,13 @@ VarDeclP evalDecls (TreeP tree);
 int eval(TreeP tree, VarDeclP decls);
 int evalMain(TreeP tree, VarDeclP decls);
 int evalIf(TreeP tree,VarDeclP decls);
+//Remplissage de structures
+ClassP makeClass(char *name, VarDeclP var, MethodP method, MethodP constructor, ...);
+//VarDeclP makeVar(char *name, ClassP varType);
+MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type);
+BlockP makeBlock(VarDeclP decl, TreeP instr);
+ArgP makeArg(char* name, ClassP type);
+
 bool isMethodInClass(Class cl, Method met);
 int getValue(TreeP tree, VarDeclP var);
 #endif
