@@ -33,6 +33,7 @@ typedef unsigned char bool;
 #define ESTR 14
 #define OP 15
 #define CONCA 16
+#define BLOCK 17
 
 
 /* Codes d'erreurs */
@@ -78,21 +79,9 @@ struct _Tree {
 
 struct _VarDecl {
   char *name;
-  ClassP varType;
+  char *varType;
   TreeP expr;
-  int val;
   struct _VarDecl *next;
-};
-
-struct _Arg {
-	char* name;
-	ClassP type;
-	struct _Arg *next;
-};
-
-struct _Block {
-	VarDeclP decl;
-	TreeP instr;
 };
 
 struct _Method {
@@ -102,8 +91,6 @@ struct _Method {
 	ClassP type;
 	struct _Method *next;
 };
-
-
 
 struct _Class {
 	char *name;
@@ -138,6 +125,7 @@ TreeP makeNode(int nbChildren, short op); // Noeud
 TreeP makeLeafStr(short op, char *str); 	    /* feuille (string) */
 TreeP makeLeafInt(short op, int val);	            /* feuille (int) */
 TreeP makeTree(short op, int nbChildren, ...);	    /* noeud interne */
+TreeP makeLeafLVar(short op, VarDeclP lvar);
 //TreeP makeLeafClass(short op, s_class classe);
 //TreeP makeLeafMethod(short op, s_method met);
 
@@ -148,13 +136,12 @@ VarDeclP evalDecls (TreeP tree);
 int eval(TreeP tree, VarDeclP decls);
 int evalMain(TreeP tree, VarDeclP decls);
 int evalIf(TreeP tree,VarDeclP decls);
-//Remplissage de structures
-ClassP makeClass(char *name, VarDeclP var, MethodP method, MethodP constructor, ...);
-//VarDeclP makeVar(char *name, ClassP varType);
-MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type);
-BlockP makeBlock(VarDeclP decl, TreeP instr);
-ArgP makeArg(char* name, ClassP type);
-
 bool isMethodInClass(Class cl, Method met);
 int getValue(TreeP tree, VarDeclP var);
+
+
+//Remplissage de structures
+VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
+MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type);
+TreeP makeBlock(VarDeclP decl, TreeP instr);
 #endif

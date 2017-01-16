@@ -122,6 +122,14 @@ TreeP makeTree(short op, int nbChildren, ...)
 	return(tree);
 }
 
+TreeP makeBlock(VarDeclP var, TreeP inst)
+{
+	TreeP tree = makeNode(2, BLOCK);
+	tree->u.children[0] = makeLeafLVar(DECL, var);
+	tree->u.children[1] = inst;
+	return(tree);
+}
+
 
 /* Retourne le rankieme fils d'un arbre (de 0 a n-1) */
 TreeP getChild(TreeP tree, int rank) {
@@ -162,85 +170,15 @@ TreeP makeLeafLVar(short op, VarDeclP lvar) {
   return(tree);
 }
 
-		/*Utiles ??
-TreeP makeLeafClass(short op, s_class classe){
-TreeP tree = makeNode(0, op);
-  tree->u.classe = classe;
-  return(tree);
+
+VarDeclP makeVarDecl(char *name, char *type, TreeP expr) {
+	VarDeclP nouveau = NEW(1, VarDecl);
+	nouveau->name = name;
+	nouveau->varType = type;
+	nouveau->expr = expr;
+	nouveau->next = NIL(VarDecl);
+	return(nouveau);
 }
-TreeP makeLeafMeth(short op, s_method met){
- TreeP tree = makeNode(0, op);
-  tree->u.method = met;
-  return(tree);
-}*/
-
-/* Avant evaluation, verifie si tout identificateur qui apparait dans tree a
- * bien ete declare (dans ce cas il doit etre dans la liste lvar).
- * On impose que ca soit le cas y compris si on n'a pas besoin de cet
- * identificateur pour l'evaluation, comme par exemple x dans
- * begin if 1 = 1 then 1 else x end
- * Le champ 'val' de la structure VarDecl n'est pas significatif
- * puisqu'on n'a encore rien evalue.
- */
-bool checkScope(TreeP tree, VarDeclP lvar) {
-	VarDeclP p;
-	char *name;
-	if (tree == NIL(Tree)) { return TRUE; }
-	switch (tree->op)
-	{
-		case IDVAR : case Id:
-			/* verifie si la variable existe dans 'lvar' ou pas */
-			name = tree->u.str;
-			for(p=lvar; p != NIL(VarDecl); p = p->next)
-			{
-				if (strcmp(p->name, name)==0) { return TRUE; }
-			}
-			fprintf(stderr, "\nError: undeclared variable %s\n", name);
-			/* setError met noEval a true de facon à bloquer les evaluations
-			* ulterieures, sinon on pourrait chercher la valeur d'une variable qui
-			* n'existe pas
-			*/
-			setError(CONTEXT_ERROR);
-			return FALSE;
-		case Cste:	/*OK : pas besoin de vérifier*/
-			return TRUE;
-		case ITE:	/*OK : on vérifie les 3 champs du ITE*/
-			return checkScope(getChild(tree, 0), lvar) /* la condition */
-				&& checkScope(getChild(tree, 1), lvar) /* la partie 'then' */
-				&& checkScope(getChild(tree, 2), lvar); /* la partie 'else' */
-		case EQ: case NE: case GT: case GE: case LT: case LE:
-		case EADD: case EMINUS: case EMULT: case EDIV:
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		default:
-			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
-			exit(UNEXPECTED);
-	}
-}
-
-/* Associe une variable a l'expression qui definit sa valeur, et procede a
- * l'evaluation de cette expression, sauf si on est en mode noEval
- */
-VarDeclP declVar(char *name, TreeP tree, VarDeclP decls)
-{
-	VarDeclP pvar = NEW(1, VarDecl);
-	pvar->name = name;
-	pvar->next = NIL(VarDecl);
-	/* verifie que l'AST ne mentionne pas de variable non declaree */
-	checkScope(tree, decls);
-	/* puis evalue l'expression en recherchant la valeur des variables dans la
-	* liste representee par 'decls'. Vu la verification precedente, la
-	* recherche ne pourra pas echouer.
-	*/
-	if (! noEval) 	{ pvar->val = eval(tree, decls); }
-
-	/* ajoute le cnouveau couple variable/valeur en tete de la liste coruante et
-	* la renvoie en resultat. Verifie en meme temps que cette variable n'a pas
-	* deja ete declaree
-	*/
-	return addToScope(decls, pvar);
-}
-
 
 
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
@@ -331,38 +269,4 @@ int getValue(TreeP tree, VarDeclP decls) {
 	 */
 	return -1;
 	}
-}
-
-/* Verifie que nouv n'apparait pas deja dans list. l'ajoute en tete et
- * renvoie la nouvelle liste
- */
-VarDeclP addToScope(VarDeclP list, VarDeclP nouv) {
-  VarDeclP p;
-  for(p=list; p != NIL(VarDecl); p = p->next) {
-    if (strcmp(p->name, nouv->name)==0) {
-      fprintf(stderr, "Error: Multiple declaration in the same scope of %s\n",
-	      p->name);
-      setError(CONTEXT_ERROR);
-      break;
-    }
-  }
-  /* On continue meme en cas de double declaration, pour pouvoir eventuellement
-   * detecter plus d'une erreur
-   */
-  nouv->next=list;
-  return nouv;
-}
-
-
-/*bool isMethodInClass(s_class cl, s_method met)
-{
-	if(cl==NULL || met==NULL)	[return FALSE;};
-	s_method tmp;
-	tmp=cl->p_classMethod;
-	while(tmp!=NULL && strcmp(tmp->methodName, met->methodName)!=0)
-	{
-		tmp=tmp->suivant;
-	}
-	if(tmp==NULL)	{ return FALSE; }
-	return TRUE;
-}*/	
+}	
