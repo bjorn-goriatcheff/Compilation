@@ -34,6 +34,12 @@ typedef unsigned char bool;
 #define OP 15
 #define CONCA 16
 #define BLOCK 17
+#define ISBLOCK 18
+#define DECL 19
+#define ARGLIST 20
+#define INST 21
+#define PROG 22
+#define ISNOTBLOCK 23
 
 
 /* Codes d'erreurs */
@@ -86,9 +92,9 @@ struct _VarDecl {
 
 struct _Method {
 	char* name;
-	ArgP args;
-	BlockP body;
-	ClassP type;
+	VarDeclP args;
+	TreeP body;
+	char* type;
 	struct _Method *next;
 };
 
@@ -97,16 +103,17 @@ struct _Class {
 	VarDeclP var;
 	MethodP method;
 	MethodP constructor;
-	struct _Class *super;
+	//struct _Class *super;
+	char* super;
 	struct _Class *next;
 };
 
 
 
 typedef union
-      { char *S;
-        char C;
-        bool B;
+  { char *S;
+	char C;
+	bool B;
 	int I;
 	TreeP pT;
 	VarDeclP pV;
@@ -142,6 +149,7 @@ int getValue(TreeP tree, VarDeclP var);
 
 //Remplissage de structures
 VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
-MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type);
+MethodP makeMeth(char* name, VarDeclP args);
 TreeP makeBlock(VarDeclP decl, TreeP instr);
+//ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, _Class* super);
 #endif
