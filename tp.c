@@ -122,13 +122,7 @@ TreeP makeTree(short op, int nbChildren, ...)
 	return(tree);
 }
 
-TreeP makeBlock(VarDeclP var, TreeP inst)
-{
-	TreeP tree = makeNode(2, BLOCK);
-	tree->u.children[0] = makeLeafLVar(DECL, var);
-	tree->u.children[1] = inst;
-	return(tree);
-}
+
 
 
 /* Retourne le rankieme fils d'un arbre (de 0 a n-1) */
@@ -163,14 +157,14 @@ TreeP makeLeafInt(short op, int val) {
   tree->u.val = val;
   return(tree);
 }
-
+/* Constructeur feuille dont la valeur est une variable */
 TreeP makeLeafLVar(short op, VarDeclP lvar) {
   TreeP tree = makeNode(0, op) ;
   tree->u.lvar = lvar;
   return(tree);
 }
 
-
+/* Remplissage */
 VarDeclP makeVarDecl(char *name, char *type, TreeP expr) {
 	VarDeclP nouveau = NEW(1, VarDecl);
 	nouveau->name = name;
@@ -180,7 +174,29 @@ VarDeclP makeVarDecl(char *name, char *type, TreeP expr) {
 	return(nouveau);
 }
 
+TreeP makeBlock(VarDeclP var, TreeP inst)
+{
+	TreeP tree = makeNode(2, BLOCK);
+	tree->u.children[0] = makeLeafLVar(DECL, var);
+	tree->u.children[1] = inst;
+	return(tree);
+}
 
+MethodP makeMeth(char* name, VarDeclP args) { 
+	MethodP nouv = NEW(1, Method);
+	return nouv; 
+}
+/*
+ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, _Class* super){
+	ClassP classe = NEW(1, _Class);
+	classe->var=var;
+	classe->meth=meth;
+	classe->cons=cons;
+	classe->super=super;
+	classe->next=NIL(_Class);
+	return(classe);
+}
+*/
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
  * l'environnement la valeur des variables referencee
  * tree: l'AST d'une expression
@@ -270,3 +286,5 @@ int getValue(TreeP tree, VarDeclP decls) {
 	return -1;
 	}
 }	
+
+
