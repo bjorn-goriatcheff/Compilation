@@ -1,5 +1,5 @@
 /* attention: NEW est defini dans tp.h Utilisez un autre token */
-%token IS VAR CLASS AFF DEF ADD SUB MUL DV UNARY AS IF THEN ELSE NEWW DOT EXTENDS OVERRIDE AND INST PROG ARGLIST CLASSB METH DECL
+%token IS VAR CLASS AFF DEF ADD SUB MUL DV UNARY AS IF THEN ELSE NEWW DOT EXTENDS OVERRIDE AND 
 %token<S> Id STRING TYPE RETURN CLASSDEF
 %token<I> Cste
 %token<C> RelOp
@@ -14,16 +14,18 @@
 %left AND
 %left DOT
 
-%type <pT> Prog classDecl classLOpt block meth methListOpt typeOpt expression opexpr bexpr instanc message select cast paramList paramListOpt inst affInst  extOpt instListOpt instList classHeader classBlock initInstOpt param initBlockOpt paramOpt argList arg
+%type <pT> Prog classDecl classLOpt block isBlock isNotBlock expression opexpr bexpr instanc message select cast paramList paramListOpt inst affInst instListOpt instList classBlock initInstOpt param initBlockOpt argList arg
 %type <B> overOpt
-%type <pV> declList declListOpt decl
+%type <pV> declList declListOpt decl paramOpt
+%type <pC> classHeader
+%type <S>  typeOpt extOpt
+%type <pM> methHeader  meth methListOpt
 
 %{
 #include "tp.h"
 #include "tp_y.h"
 
 VarDeclP lvar;
-MethodP lmeth;
 ClassP lclass;
 
 extern int yylex();
@@ -34,17 +36,17 @@ extern void yyerror(char *);
 Prog : classLOpt block { $$ = makeTree(PROG, 2, $1, $2); lvar=NEW (0, VarDecl); };
 
 classLOpt: { $$ = NIL(Tree); }
-| classDecl classLOpt { $$ = makeTree(CLASSDEF, 2, $1, $2); }
+| classDecl classLOpt 
 ;
 
-classDecl: classHeader IS classBlock { $$ = makeTree(IS, 2, $1, $3);  }
+classDecl: classHeader IS classBlock 
+;
+/* initblockOpt a faire */
+classHeader: CLASS param extOpt initBlockOpt 
 ;
 
-classHeader: CLASS param extOpt initBlockOpt {  }
-;
-
-extOpt: { $$ = NIL(Tree); }
-| EXTENDS TYPE '(' paramListOpt ')' {$$ = makeTree(EXTENDS, 2, $2, $4); }
+extOpt: { $$ = NIL(char); }
+| EXTENDS TYPE '(' paramListOpt ')' { $$ = $2; } // on ignore paramLopt
 ;
 /* makeBlock */
 block: '{' instListOpt '}' { $$ = makeBlock(NIL(VarDecl) ,$2); }
@@ -78,32 +80,32 @@ decl: VAR Id ':' TYPE initInstOpt ';' { $$ = makeVarDecl($2 , $4, $5); }
 ;
 
 
-classBlock: '{' declListOpt methListOpt'}' { $$ = makeTree(CLASSB, 2, $2, $3); }
+classBlock: '{' declListOpt methListOpt'}' 
 ;
 
-methListOpt: { $$ = NIL(Tree); }
-| meth methListOpt { $$ = makeTree(METH, 2, $1, $2); }
+methListOpt: { $$ = NIL(Method); }
+| meth methListOpt { $1->next=$2; $$=$1;}
 ;
 
-meth: overOpt methHeader isBlock
-| overOpt methHeader isNotBlock
+meth: overOpt methHeader isBlock { $2->type=$3->u.children[0]->u.str; $2->body=$3->u.children[1]; $$=$2; }
+| overOpt methHeader isNotBlock { $2->type=$3->u.children[0]->u.str; $2->body=$3->u.children[1]; $$=$2; }
 ;
 
 overOpt: { $$ = FALSE; }
 | OVERRIDE {  $$ = TRUE; }
 ;
-
-isNotBlock: ':' TYPE AFF expression
+// regler l'affectation
+isNotBlock: ':' TYPE AFF expression { $$ = makeTree(ISNOTBLOCK, 2, $2, $4); }
 ;
 
-isBlock: typeOpt IS block
+isBlock: typeOpt IS block { $$ = makeTree(ISBLOCK, 2, $1, $3); }
 ;
 
-typeOpt: { $$ = NIL(Tree); }
-| ':' TYPE
+typeOpt: { $$ = NIL(char); }
+| ':' TYPE { $$ = $2; }
 ;
 
-methHeader: DEF Id '(' paramOpt ')'
+methHeader: DEF Id '(' paramOpt ')' { $$ = makeMeth($2, $4); }
 ;
 
 initInstOpt: { $$ = NIL(Tree); }
@@ -113,7 +115,7 @@ initInstOpt: { $$ = NIL(Tree); }
 
 
 initBlockOpt: { $$ = NIL(Tree); }
-| block
+| block 
 
 affInst: expression AFF expression ';'
 ;
@@ -164,7 +166,7 @@ bexpr: expression RelOp expression 		{ $$ = makeTree($2, 2, $1, $3); }
 param: TYPE '(' paramOpt ')' { $$ = makeTree(TYPE, 1, $3); }
 ;
 
-paramOpt: { $$ = NIL(Tree); }
+paramOpt: { $$ = NIL(VarDecl); }
 | argList
 ;
 
