@@ -186,17 +186,33 @@ MethodP makeMeth(char* name, VarDeclP args) {
 	MethodP nouv = NEW(1, Method);
 	return nouv; 
 }
-/*
-ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, _Class* super){
-	ClassP classe = NEW(1, _Class);
+
+MethodP fillMeth(MethodP meth, TreeP bloc){
+	meth->type=bloc->u.children[0]->u.str;
+	meth->body=bloc->u.children[1];
+	return meth;
+}
+
+CorpP makeCorps(VarDeclP var, MethodP method)
+{
+    CorpP corps = NEW(1, Corps);
+    corps->method = method;
+    corps->var = var;
+    return(corps);
+}
+
+ClassP makeClass(char* name, VarDeclP var, Class* super){
+	ClassP classe = NEW(1, Class);
 	classe->var=var;
-	classe->meth=meth;
-	classe->cons=cons;
-	classe->super=super;
-	classe->next=NIL(_Class);
+	classe->super=super->name; // nom de la classe et pas la structure
+	classe->next=NIL(Class);
 	return(classe);
 }
-*/
+
+void makeProg(ClassP listC, MethodP listM) {
+
+}
+
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
  * l'environnement la valeur des variables referencee
  * tree: l'AST d'une expression

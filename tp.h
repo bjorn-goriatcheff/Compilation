@@ -40,6 +40,8 @@ typedef unsigned char bool;
 #define INST 21
 #define PROG 22
 #define ISNOTBLOCK 23
+#define AFFEC 24
+
 
 
 /* Codes d'erreurs */
@@ -70,6 +72,9 @@ typedef struct _Method Method, *MethodP;
 
 struct _Class;
 typedef struct _Class Class, *ClassP;
+
+struct _CorpsClass;
+typedef struct _CorpsClass Corps, *CorpP;
 
 /* la structure d'un arbre (noeud ou feuille) */
 struct _Tree {
@@ -103,12 +108,14 @@ struct _Class {
 	VarDeclP var;
 	MethodP method;
 	MethodP constructor;
-	//struct _Class *super;
 	char* super;
 	struct _Class *next;
 };
 
-
+struct _CorpsClass {
+	MethodP method;
+	VarDeclP var;
+};
 
 typedef union
   { char *S;
@@ -119,6 +126,7 @@ typedef union
 	VarDeclP pV;
 	ClassP pC;
 	MethodP pM;
+	CorpP pCo;
 } YYSTYPE;
 
 #define YYSTYPE YYSTYPE
@@ -133,9 +141,6 @@ TreeP makeLeafStr(short op, char *str); 	    /* feuille (string) */
 TreeP makeLeafInt(short op, int val);	            /* feuille (int) */
 TreeP makeTree(short op, int nbChildren, ...);	    /* noeud interne */
 TreeP makeLeafLVar(short op, VarDeclP lvar);
-//TreeP makeLeafClass(short op, s_class classe);
-//TreeP makeLeafMethod(short op, s_method met);
-
 	//Gestion
 VarDeclP addToScope(VarDeclP list, VarDeclP nouv);
 VarDeclP declVar(char *name, TreeP tree, VarDeclP decls);
@@ -151,5 +156,8 @@ int getValue(TreeP tree, VarDeclP var);
 VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
 MethodP makeMeth(char* name, VarDeclP args);
 TreeP makeBlock(VarDeclP decl, TreeP instr);
-//ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, _Class* super);
+MethodP fillMeth(MethodP meth, TreeP bloc);
+CorpP makeCorps(VarDeclP decl, MethodP meth);
+ClassP makeClass(char* name, VarDeclP var, Class* super);
+void makeProg(ClassP listC, MethodP listM);
 #endif
