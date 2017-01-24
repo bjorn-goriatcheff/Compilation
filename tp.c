@@ -31,8 +31,8 @@ FILE *out; /* fichier de sortie pour le code engendre */
 
 int main(int argc, char **argv)
 {
-	
-	
+
+
   int fi;
   int i, res;
 
@@ -71,41 +71,6 @@ int main(int argc, char **argv)
     fprintf(stderr, "erreur: Cannot open %s\n", argv[i-1]);
     exit(USAGE_ERROR);
   }
-
-////////////////////////////////////// TEST //////////////////////////////////////////
-	printf("\t\ttest dans main\n\n");
-
-	TreeP t1, t11, t12 = NEW(1,Tree);
-	TreeP t2, t21, t22   = NEW(1,Tree);
-	TreeP t3, t31, t32  = NEW(1,Tree);
-	TreeP T = NEW(1,Tree);
- 
-	t11=makeLeafInt(Cste, 1);
-	t12=makeLeafInt(Cste,1);
-	t1=makeTree(EQ,2,t11,t12);
-	
-	t2 =makeNode(2, EADD);
-	t21=makeLeafInt(Cste,2);
-	t22=makeLeafInt(Cste,2);
-	setChild(t2,0,t21);
-	setChild(t2,1,t22);
-	
-	t3 =makeNode(2, EMINUS);
-	t31=makeLeafInt(Cste,3);
-	t32=makeLeafInt(Cste,3);
-	setChild(t3,0,t31);
-	setChild(t3,1,t32);;
-
-	T=makeNode(3, ITE);	
-	setChild(T,0,t1);
-	setChild(T,1,t2);
-	setChild(T,2,t3);
-	/*T=makeNode(2, EQ);	
-	setChild(T,0,t11);
-	setChild(T,1,t3);*/
-
-
-	printTree(T);
 
   /* redirige l'entree standard sur le fichier... */
   close(0); dup(fi); close(fi);
@@ -191,106 +156,47 @@ TreeP makeLeafInt(short op, int val) {
   return(tree);
 }
 
+/* Constructeur feuille dont la valeur est une variable */
 TreeP makeLeafLVar(short op, VarDeclP lvar) {
   TreeP tree = makeNode(0, op) ;
   tree->u.lvar = lvar;
   return(tree);
 }
 
-/* Avant evaluation, verifie si tout identificateur qui apparait dans tree a
- * bien ete declare (dans ce cas il doit etre dans la liste lvar).
- * On impose que ca soit le cas y compris si on n'a pas besoin de cet
- * identificateur pour l'evaluation, comme par exemple x dans
- * begin if 1 = 1 then 1 else x end
- * Le champ 'val' de la structure VarDecl n'est pas significatif
- * puisqu'on n'a encore rien evalue.
- */
-bool checkScope(TreeP tree, VarDeclP lvar) {
-	VarDeclP p;
-	char *name;
-	if (tree == NIL(Tree)) { return TRUE; }
-	switch (tree->op)
-	{
-		case IDVAR : case Id:
-			/* verifie si la variable existe dans 'lvar' ou pas */
-			name = tree->u.str;
-			for(p=lvar; p != NIL(VarDecl); p = p->next)
-			{
-				if (strcmp(p->name, name)==0) { return TRUE; }
-			}
-			fprintf(stderr, "\nError: undeclared variable %s\n", name);
-			/* setError met noEval a true de facon à bloquer les evaluations
-			* ulterieures, sinon on pourrait chercher la valeur d'une variable qui
-			* n'existe pas
-			*/
-			setError(CONTEXT_ERROR);
-			return FALSE;
-		case Cste:	/*OK : pas besoin de vérifier*/
-			return TRUE;
-		case ITE:	/*OK : on vérifie les 3 champs du ITE*/
-			return checkScope(getChild(tree, 0), lvar) /* la condition */
-				&& checkScope(getChild(tree, 1), lvar) /* la partie 'then' */
-				&& checkScope(getChild(tree, 2), lvar); /* la partie 'else' */
-		case EQ: 
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case NE:
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case GT: 
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case GE: 
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case LT: 
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case LE:
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case EADD: 
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case EMINUS: 
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case EMULT: 
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		case EDIV:
-			return checkScope(getChild(tree, 0), lvar)
-				&& checkScope(getChild(tree, 1), lvar);
-		default:
-			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
-			exit(UNEXPECTED);
-	}
+/* Remplissage */
+VarDeclP makeVarDecl(char *name, char *type, TreeP expr) {
+	VarDeclP nouveau = NEW(1, VarDecl);
+	nouveau->name = name;
+	nouveau->varType = type;
+	nouveau->expr = expr;
+	nouveau->next = NIL(VarDecl);
+	return(nouveau);
 }
 
-/* Associe une variable a l'expression qui definit sa valeur, et procede a
- * l'evaluation de cette expression, sauf si on est en mode noEval
- */
-VarDeclP declVar(char *name, TreeP tree, VarDeclP decls)
+TreeP makeBlock(VarDeclP var, TreeP inst)
 {
-	VarDeclP pvar = NEW(1, VarDecl);
-	pvar->name = name;
-	pvar->next = NIL(VarDecl);
-	/* verifie que l'AST ne mentionne pas de variable non declaree */
-	checkScope(tree, decls);
-	/* puis evalue l'expression en recherchant la valeur des variables dans la
-	* liste representee par 'decls'. Vu la verification precedente, la
-	* recherche ne pourra pas echouer.
-	*/
-	if (! noEval) 	{ pvar->val = eval(tree, decls); }
+	TreeP tree = makeNode(2, BLOCK);
+	tree->u.children[0] = makeLeafLVar(DECL, var);
+	tree->u.children[1] = inst;
+	return(tree);
+}
 
-	/* ajoute le cnouveau couple variable/valeur en tete de la liste coruante et
-	* la renvoie en resultat. Verifie en meme temps que cette variable n'a pas
-	* deja ete declaree
-	*/
-	return addToScope(decls, pvar);
+MethodP makeMeth(char* name, VarDeclP args) {
+	MethodP nouv = NEW(1, Method);
+	return nouv;
 }
 
 
+ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, char* sup){
+	ClassP classe = NEW(1, Class);
+    classe->name=name;
+    classe->var=var;
+    classe->method=meth;
+    classe->constructor=cons;
+    classe->super=sup;
+    classe->next=NULL;
+	return(classe);
+}
 
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
  * l'environnement la valeur des variables referencee
@@ -301,9 +207,7 @@ int eval(TreeP tree, VarDeclP decls) {
 	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
 	switch (tree->op)
 	{
-		case IDVAR: 
-			return getValue(tree, decls);
-		case Id:
+		case IDVAR: case Id:
 			return getValue(tree, decls);
 		case Cste:
 			return(tree->u.val);
@@ -333,7 +237,7 @@ int eval(TreeP tree, VarDeclP decls) {
 			else { return ( eval(getChild(tree,0), decls)/ eval(getChild(tree,1), decls) ); }
 		}
 		case ITE:
-			return evalIte(tree, decls);
+			return evalIf(tree, decls);
 		default:
 			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
 			exit(UNEXPECTED);
@@ -346,7 +250,7 @@ int eval(TreeP tree, VarDeclP decls) {
  * les deux autres fils correspondent respectivement aux parties then et else.
  * Attention a n'evaluer qu'un seul de ces deux sous-arbres !
  */
-int evalIte(TreeP tree, VarDeclP decls)
+int evalIf(TreeP tree, VarDeclP decls)
 {
 	if (eval(getChild(tree, 0), decls)) {
 		return eval(getChild(tree, 1), decls);
@@ -384,155 +288,157 @@ int getValue(TreeP tree, VarDeclP decls) {
 	}
 }
 
-/* Verifie que nouv n'apparait pas deja dans list. l'ajoute en tete et
- * renvoie la nouvelle liste
- */
-VarDeclP addToScope(VarDeclP list, VarDeclP nouv) {
-  VarDeclP p;
-  for(p=list; p != NIL(VarDecl); p = p->next) {
-    if (strcmp(p->name, nouv->name)==0) {
-      fprintf(stderr, "Error: Multiple declaration in the same scope of %s\n",
-	      p->name);
-      setError(CONTEXT_ERROR);
-      break;
+//Vérifications Contextuelles
+bool areClassTheSame(ClassP c1, ClassP c2)
+{
+    if(c1==NULL || c2==NULL)
+        { abort(); }
+    else if(strcmp(c1->name,c2->name)==0 && c1->var==c2->var && strcmp(c1->super,c2->super) && c1->method==c2->method)
+        { return TRUE; }
+    return FALSE;
+}
+
+bool areMethodsTheSame(MethodP ma, MethodP mb)
+{
+    if(ma==NULL || mb==NULL)
+        { abort(); }
+    else if(strcmp(ma->name,mb->name)==0 && ma->args==mb->args && strcmp(ma->type,mb->type)    )
+        {   return TRUE; }
+    return FALSE;
+}
+
+bool areVarTheSame(VarDeclP va, VarDeclP vb)
+{
+    if( (va==NULL && vb!=NULL) || (va!=NULL && vb==NULL)  )
+        {return FALSE;}
+    if(strcmp(va->name,vb->name)==0 && strcmp(va->varType,vb->varType)==0 && va->expr==vb->expr   )
+        {return TRUE;}
+    return FALSE;
+}
+
+bool doesClassExist(ClassP lClass, char* cName)
+{
+    if(lClass==NULL || cName==NULL)
+        { abort(); }
+    ClassP temp = lClass;
+    while ( temp!=NULL )
+    {
+        if( strcmp(temp->name, cName)==0 )
+            { return TRUE; }
+        temp=temp->next;
     }
-  }
-  /* On continue meme en cas de double declaration, pour pouvoir eventuellement
-   * detecter plus d'une erreur
-   */
-  nouv->next=list;
-  return nouv;
+    return FALSE;
 }
 
-
-/*bool isMethodInClass(s_class cl, s_method met)
+bool isMethodInClass(MethodP met, ClassP cl)
 {
-	if(cl==NULL || met==NULL)	[return FALSE;};
-	s_method tmp;
-	tmp=cl->p_classMethod;
-	while(tmp!=NULL && strcmp(tmp->methodName, met->methodName)!=0)
+    if(met==NULL || cl==NULL)
+        { abort(); }
+	MethodP temp;
+	temp = cl->method;
+	while(temp != NULL)
 	{
-		tmp=tmp->suivant;
+		if(areMethodsTheSame(temp,met) )
+            { return TRUE; }
+		temp=temp->next;
 	}
-	if(tmp==NULL)	{ return FALSE; }
-	return TRUE;
-}*/	
-
-
-
-/* tree : l'ast d'une expression 
- * d : liste des variables déjà déclarées avec une valeur
-*/
-void printTree(TreeP tree)
-{
-	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
-	switch (tree->op)
-	{
-		case IDVAR: 
-			printf("IDVAR: %s ", tree->u.str);
-			break;
-		case Id:
-			printf("Id: %s ", tree->u.str);
-			break;
-		case Cste : 
-			printf("Cste: %d ", tree->u.val);
-			break;
-		case EQ: 
-			printf("\nEQ: ");
-			printTree(getChild(tree,0));
-			printf("  ,  ");	
-			printTree(getChild(tree,1));
-			break;
-		case NE: 
-			printf("\nNE: ");
-			printTree(getChild(tree,0));
-			printf("\t");	
-			printTree(getChild(tree,1));
-			break;
-		case LT : 
-			printf("\nLT: ");
-			printTree(getChild(tree,0));
-			printf("\t");	
-			printTree(getChild(tree,1));
-			break;
-		case LE: 
-			printf("\nLE: ");
-			printTree(getChild(tree,0));
-			printf("\t");	
-			printTree(getChild(tree,1));
-			break;
-		case GT:
-			printf("\nGT: ");
-			printTree(getChild(tree,0));
-			printf("\t");	
-			printTree(getChild(tree,1));
-			break;
-		case GE :
-			printf("\nGE: ");
-			printTree(getChild(tree,0));
-			printf("\t");	
-			printTree(getChild(tree,1));
-			break;
-		case ITE : 
-			printf("\nITE: ");
-			printTree(getChild(tree,0));
-			printf("\t");	
-			printTree(getChild(tree,1));
-			printf("\t");
-			printTree(getChild(tree,2));
-			break;
-		case EADD: case EMINUS:  case EMULT : case EDIV : 
-			printf("\nADD/MIN/MULT/DIV: ");
-			printTree(getChild(tree,0));
-			printf("\t");	
-			printTree(getChild(tree,1));
-			break;
-		default:
-			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
-			exit(UNEXPECTED);
-	}
+	return FALSE;
 }
 
-MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type)
+bool isVarInMethod(VarDeclP v, MethodP m)
 {
-	MethodP m = NEW(1,Method);
-	m->name=name;
-	m->args = args;
-	m->body = body; 
-	m->type = type;
-	m->next=NULL;
-	return m;
+    if(v==NULL || m==NULL)
+        {abort();}
+    VarDeclP temp=m->args;
+    while(temp!=NULL)
+    {
+        if(areVarTheSame(temp,v))
+            {return TRUE;}
+        temp=temp->next;
+    }
+    return FALSE;
 }
 
-ArgP makeArg(char* name, ClassP type)
+bool checkClass(ClassP listClass, ClassP c)
 {
-	ArgP arg = NEW(1,Arg);
-	arg->name=name;
-	arg->type=type;
-	arg->next=NULL;
-	return arg;
+        //?????????????????????check next ????????????
+    bool nomOk,varOk,metOk, consOk, herOk;
+    if( c->name!=NULL && c->name[0] >= 'A' && c->name[0] <= 'Z' )
+        { nomOk=TRUE; }
+
+    metOk=checkMethods(c);
+    consOk=checkMethod(c->constructor);
+    varOk=checkVar(c->var);
+
+    if(c->super==NULL)
+        { herOk=TRUE;}
+    else
+        { herOk=return checkClass(listClass, getSuper(listClass, c)); //a faire arg(super) = arg(fille) }
+
+    if(nomOk && metOk && varOk && herOk)
+        { return TRUE;}
+    return FALSE;
 }
 
-BlockP makeBlock(VarDeclP decl, TreeP instr)
+bool checkMethods(ClassP c)
 {
-	BlockP b = NEW(1,Block);
-	b->decl=decl;
-	b->instr=instr;
-	return b;
+    if(c==NULL)
+        {abort();}
+    MethodP temp = c->method;
+    while(temp!=NULL)
+    {
+        if( checkMethod(temp)==FALSE )
+            {return FALSE;}
+        temp=temp->next;
+    }
+    return TRUE;
 }
 
-ClassP makeClass(char *name, VarDeclP var, MethodP method, MethodP constructor, ...)
+bool checkMethod(MethodP m)
 {
-	ClassP c = NEW(1,Class);
-	c->name = name;
-	c->var=var;
-	c->method = method;
-	c->constructor = constructor;
-	c->next=NULL;	
-	return c;
+    // nom ok, args ok, body ok, type ok  ????????????????????check next????????
+    return FALSE;
 }
 
+bool checkVar(VarDeclP v)
+{
+    //name ok, type ok, expr ok, ?????????????????????check next ????????????
+    return FALSE;
+}
 
+//Autre
+ClassP getSuper(ClassP listClass, ClassP c)
+{
+    if(listClass==NULL || c==NULL)
+            {abort();}
+    if( doesClassExist(listClass,c->super) )
+        {return getClass(listClass, c->super);}
+    abort();
+}
 
+ClassP getClass(ClassP listC, char *name)
+{
+    if(lsitC==NULL || name==NULL)
+        {abort();}
+    ClassP temp=listC;
+    while(temp!=NULL)
+    {
+        if(strcmp(name,temp->name)==0)
+        {
+            return temp;
+        }
+    }
+    abort();
+}
 
-
+MethodP getMethod(MethodP m, ClassP c)
+{
+    if(m==NULL || c==NULL)
+        { abort(); }
+    MethodP temp=c->method;
+    while(temp!=NULL)
+    {
+        if(strcmp(m->name, temp->name)==0)
+            {return temp;}
+    }
+}

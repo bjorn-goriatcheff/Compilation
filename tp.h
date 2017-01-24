@@ -33,6 +33,13 @@ typedef unsigned char bool;
 #define ESTR 14
 #define OP 15
 #define CONCA 16
+#define BLOCK 17
+#define ISBLOCK 18
+#define DECL 19
+#define ARGLIST 20
+#define INST 21
+#define PROG 22
+#define ISNOTBLOCK 23
 
 
 /* Codes d'erreurs */
@@ -78,47 +85,33 @@ struct _Tree {
 
 struct _VarDecl {
   char *name;
-  ClassP varType;
+  char *varType;
   TreeP expr;
-  int val;
   struct _VarDecl *next;
-};
-
-struct _Arg {
-	char* name;
-	ClassP type;
-	struct _Arg *next;
-};
-
-struct _Block {
-	VarDeclP decl;
-	TreeP instr;
 };
 
 struct _Method {
 	char* name;
-	ArgP args;
-	BlockP body;
-	ClassP type;
+	VarDeclP args;
+	TreeP body;
+	char* type;
 	struct _Method *next;
 };
-
-
 
 struct _Class {
 	char *name;
 	VarDeclP var;
 	MethodP method;
 	MethodP constructor;
-	struct _Class *super;
+	char* super;
 	struct _Class *next;
 };
 
 
-
 typedef union
-      { char *S;
-        char C;
+  { char *S;
+	char C;
+	bool B;
 	int I;
 	TreeP pT;
 	VarDeclP pV;
@@ -137,24 +130,41 @@ TreeP makeNode(int nbChildren, short op); // Noeud
 TreeP makeLeafStr(short op, char *str); 	    /* feuille (string) */
 TreeP makeLeafInt(short op, int val);	            /* feuille (int) */
 TreeP makeTree(short op, int nbChildren, ...);	    /* noeud interne */
-TreeP getChild(TreeP tree, int rank);
-void setChild(TreeP tree, int rank, TreeP arg);
+TreeP makeLeafLVar(short op, VarDeclP lvar);
+//TreeP makeLeafClass(short op, s_class classe);
+//TreeP makeLeafMethod(short op, s_method met);
 
 	//Gestion
 VarDeclP addToScope(VarDeclP list, VarDeclP nouv);
 VarDeclP declVar(char *name, TreeP tree, VarDeclP decls);
 VarDeclP evalDecls (TreeP tree);
 int eval(TreeP tree, VarDeclP decls);
-int evalIte(TreeP tree,VarDeclP decls);
-bool isMethodInClass(Class cl, Method met);
+int evalMain(TreeP tree, VarDeclP decls);
+int evalIf(TreeP tree,VarDeclP decls);
 int getValue(TreeP tree, VarDeclP var);
-void printTree(TreeP tree);
-
-ClassP makeClass(char *name, VarDeclP var, MethodP method, MethodP constructor, ...);
-//VarDeclP makeVar(char *name, ClassP varType);
-MethodP makeMeth(char* name, ArgP args, BlockP body, ClassP type);
-BlockP makeBlock(VarDeclP decl, TreeP instr);
-ArgP makeArg(char* name, ClassP type);
 
 
+//Remplissage de structures
+VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
+MethodP makeMeth(char* name, VarDeclP args);
+TreeP makeBlock(VarDeclP decl, TreeP instr);
+ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, char* super);
+
+//Vérifications Contextuelles
+bool areClassTheSame(ClassP c1,ClassP c2);
+bool areMethodsTheSame(MethodP ma,MethodP mb);
+bool areVarTheSame(VarDeclP va, VarDeclP vb);
+
+bool doesClassExist(ClassP listClass, char* name);
+bool isMethodInClass(MethodP m,ClassP c);
+bool isVarInMethod(VarDeclP v, MethodP m);
+
+bool checkClass(ClassP listClass, ClassP c);
+bool checkMethods(ClassP c);
+bool checkMethod(MethodP m);
+bool checkVar(VarDeclP v);
+//bool checkHeritage(ClassP listClass, ClassP super);
+
+ClassP getSuper(ClassP listClass, ClassP c);
+ClassP getClass(ClassP listClass, char* name);
 #endif
