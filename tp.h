@@ -73,8 +73,8 @@ typedef struct _Method Method, *MethodP;
 struct _Class;
 typedef struct _Class Class, *ClassP;
 
-struct _CorpsClass;
-typedef struct _CorpsClass Corps, *CorpP;
+struct _TeteClass;
+typedef struct _TeteClass Tete, *TeteP;
 
 /* la structure d'un arbre (noeud ou feuille) */
 struct _Tree {
@@ -112,8 +112,8 @@ struct _Class {
 	struct _Class *next;
 };
 
-struct _CorpsClass {
-	MethodP method;
+struct _TeteClass {
+	char* type;
 	VarDeclP var;
 };
 
@@ -160,5 +160,7 @@ MethodP fillMeth(MethodP meth, TreeP bloc);
 CorpP makeCorps(VarDeclP decl, MethodP meth);
 ClassP makeClass(char* name, VarDeclP var, char* super);
 ClassP fillClass(ClassP class, char* super, TreeP bloc);
+TeteP makeTete(char* nom, VarDeclP var);
+
 void makeProg(ClassP listC, MethodP listM);
 #endif
