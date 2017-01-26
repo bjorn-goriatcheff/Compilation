@@ -43,7 +43,7 @@ classLOpt: { $$ = NIL(Tree); }
 classDecl: classHeader IS classBlock  //remplissage de la classe FILL                 ///recuperer declList et methList (grammaire issue)
 ;
 /* initblockOpt a faire */
-classHeader: CLASS param extOpt initBlockOpt //création de la class makeClass
+classHeader: CLASS param extOpt initBlockOpt  //création de la class makeClass
 ;
 
 extOpt: { $$ = NIL(char); }
@@ -86,8 +86,8 @@ methListOpt: { $$ = NIL(Method); }
 | meth methListOpt { $1->next=$2; $$=$1;}
 ;
 
-meth: overOpt methHeader isBlock { fillMeth($2, $3);}
-| overOpt methHeader isNotBlock { fillMeth($2, $3);}
+meth: overOpt methHeader isBlock { $$=fillMeth($2, $3);}
+| overOpt methHeader isNotBlock { $$=fillMeth($2, $3);}
 ;
 
 overOpt: { $$ = FALSE; }
@@ -163,7 +163,7 @@ opexpr: expression ADD expression		{ $$ = makeTree(EADD, 2, $1, $3); }
 bexpr: expression RelOp expression 		{ $$ = makeTree($2, 2, $1, $3); }
 ;
 
-param: TYPE '(' paramOpt ')' { $$ = makeTree(TYPE, 1, $3); }
+param: TYPE '(' paramOpt ')' { $$ = makeClass($1, $3, NIL(char)); }
 ;
 
 paramOpt: { $$ = NIL(VarDecl); }
