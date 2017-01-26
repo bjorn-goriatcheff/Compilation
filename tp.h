@@ -159,7 +159,6 @@ TreeP makeBlock(VarDeclP decl, TreeP instr);
 MethodP fillMeth(MethodP meth, TreeP bloc);
 CorpP makeCorps(VarDeclP decl, MethodP meth);
 ClassP makeClass(char* name, VarDeclP var, char* super);
-ClassP fillClass(ClassP class, char* super, TreeP bloc);
 TeteP makeTete(char* nom, VarDeclP var);
 
 void makeProg(ClassP listC, MethodP listM);
