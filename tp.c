@@ -200,12 +200,12 @@ ClassP fillClass(ClassP class, char* super, TreeP bloc){
 	return class;
 }
 
-CorpP makeCorps(VarDeclP var, MethodP method)
+TeteP makeTete(char* nom, VarDeclP var)
 {
-    CorpP corps = NEW(1, Corps);
-    corps->method = method;
-    corps->var = var;
-    return(corps);
+    TeteP tete = NEW(1, Tete);
+    tete->type = nom;
+    tete->var = var;
+    return(tete);
 }
 
 ClassP makeClass(char* name, VarDeclP var, char* super){
