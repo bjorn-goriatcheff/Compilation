@@ -103,6 +103,7 @@ struct _Class {
 	VarDeclP var;
 	MethodP method;
 	MethodP constructor;
+	bool isInherited;
 	char* super;
 	struct _Class *next;
 };
@@ -148,10 +149,10 @@ int getValue(TreeP tree, VarDeclP var);
 VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
 MethodP makeMeth(char* name, VarDeclP args);
 TreeP makeBlock(VarDeclP decl, TreeP instr);
-ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, char* super);
+ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons,bool inherited, char* super);
 
 //Vérifications Contextuelles
-bool areClassTheSame(ClassP c1,ClassP c2);
+bool areClassTheSame(ClassP c1,ClassP c2); /* Est-ce qu'on en a vraiment besoin ?? */
 bool areMethodsTheSame(MethodP ma,MethodP mb);
 bool areVarTheSame(VarDeclP va, VarDeclP vb);
 
@@ -163,8 +164,7 @@ bool checkClass(ClassP listClass, ClassP c);
 bool checkMethods(ClassP c);
 bool checkMethod(MethodP m);
 bool checkVar(VarDeclP v);
-//bool checkHeritage(ClassP listClass, ClassP super);
+bool checkHeritage(ClassP listClass, ClassP c);
 
-ClassP getSuper(ClassP listClass, ClassP c);
-ClassP getClass(ClassP listClass, char* name);
+ClassP getClass(ClassP listClass, char* name); /* On suppose qu'on a vérifié que la classe existe AVANT */
 #endif

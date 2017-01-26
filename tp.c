@@ -163,41 +163,6 @@ TreeP makeLeafLVar(short op, VarDeclP lvar) {
   return(tree);
 }
 
-/* Remplissage */
-VarDeclP makeVarDecl(char *name, char *type, TreeP expr) {
-	VarDeclP nouveau = NEW(1, VarDecl);
-	nouveau->name = name;
-	nouveau->varType = type;
-	nouveau->expr = expr;
-	nouveau->next = NIL(VarDecl);
-	return(nouveau);
-}
-
-TreeP makeBlock(VarDeclP var, TreeP inst)
-{
-	TreeP tree = makeNode(2, BLOCK);
-	tree->u.children[0] = makeLeafLVar(DECL, var);
-	tree->u.children[1] = inst;
-	return(tree);
-}
-
-MethodP makeMeth(char* name, VarDeclP args) {
-	MethodP nouv = NEW(1, Method);
-	return nouv;
-}
-
-
-ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, char* sup){
-	ClassP classe = NEW(1, Class);
-    classe->name=name;
-    classe->var=var;
-    classe->method=meth;
-    classe->constructor=cons;
-    classe->super=sup;
-    classe->next=NULL;
-	return(classe);
-}
-
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
  * l'environnement la valeur des variables referencee
  * tree: l'AST d'une expression
@@ -288,12 +253,51 @@ int getValue(TreeP tree, VarDeclP decls) {
 	}
 }
 
-//Vérifications Contextuelles
+                                        //NOUVEAU
+
+/* Remplissage AST*/
+VarDeclP makeVarDecl(char *name, char *type, TreeP expr) {
+	VarDeclP nouveau = NEW(1, VarDecl);
+	nouveau->name = name;
+	nouveau->varType = type;
+	nouveau->expr = expr;
+	nouveau->next = NIL(VarDecl);
+	return(nouveau);
+}
+
+TreeP makeBlock(VarDeclP var, TreeP inst)
+{
+	TreeP tree = makeNode(2, BLOCK);
+	tree->u.children[0] = makeLeafLVar(DECL, var);
+	tree->u.children[1] = inst;
+	return(tree);
+}
+
+MethodP makeMeth(char* name, VarDeclP args) {
+	MethodP nouv = NEW(1, Method);
+	return nouv;
+}
+
+ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, bool inherited, char* sup ){
+	ClassP classe = NEW(1, Class);
+    classe->name=name;
+    classe->var=var;
+    classe->method=meth;
+    classe->constructor=cons;
+    classe->super=sup;
+    classe->next=NULL;
+	return(classe);
+}
+
+
+
+/*Vérifications Contextuelles*/
 bool areClassTheSame(ClassP c1, ClassP c2)
 {
     if(c1==NULL || c2==NULL)
         { abort(); }
-    else if(strcmp(c1->name,c2->name)==0 && c1->var==c2->var && strcmp(c1->super,c2->super) && c1->method==c2->method)
+    else if(strcmp(c1->name,c2->name)==0 && areVarTheSame(c1->var,c2->var) && areMethodsTheSame(c1->method , c2->method) && c1->isInherited ==
+    c2->isInherited  && strcmp(c1->super,c2->super) && areMethodsTheSame(c1->constructor,c2->constructor))
         { return TRUE; }
     return FALSE;
 }
@@ -302,8 +306,8 @@ bool areMethodsTheSame(MethodP ma, MethodP mb)
 {
     if(ma==NULL || mb==NULL)
         { abort(); }
-    else if(strcmp(ma->name,mb->name)==0 && ma->args==mb->args && strcmp(ma->type,mb->type)    )
-        {   return TRUE; }
+    else if(strcmp(ma->name,mb->name)==0 && areVarTheSame(ma->args,mb->args) && strcmp(ma->type,mb->type)==0    )
+        {   return areMethodsTheSame(ma->next,mb->next) ;}
     return FALSE;
 }
 
@@ -312,7 +316,7 @@ bool areVarTheSame(VarDeclP va, VarDeclP vb)
     if( (va==NULL && vb!=NULL) || (va!=NULL && vb==NULL)  )
         {return FALSE;}
     if(strcmp(va->name,vb->name)==0 && strcmp(va->varType,vb->varType)==0 && va->expr==vb->expr   )
-        {return TRUE;}
+        {return areVarTheSame(va->next,vb->next);}
     return FALSE;
 }
 
@@ -358,6 +362,25 @@ bool isVarInMethod(VarDeclP v, MethodP m)
     }
     return FALSE;
 }
+bool checkHeritage(ClassP listClass, ClassP c)
+{ /* la classe super est bonne + les var de la super sont dans la classe fille*/
+        ClassP sup= getClass(listClass,c->super);
+        VarDeclP tempM = sup->var;
+        VarDeclP tempF=c->var;
+        while(tempM != NULL){
+            if(tempF==NULL)
+                {return FALSE;}
+            else if(areVarTheSame(tempM,tempF)==FALSE)
+                {tempF=tempF->next;}
+            else if(areVarTheSame(tempM,tempF)==TRUE)
+            {   tempM = tempM->next;
+                tempF = c->var;
+            }
+            else
+                {abort();}
+        }
+        return checkClass(listClass, sup )==TRUE;
+}
 
 bool checkClass(ClassP listClass, ClassP c)
 {
@@ -373,9 +396,9 @@ bool checkClass(ClassP listClass, ClassP c)
     if(c->super==NULL)
         { herOk=TRUE;}
     else
-        { herOk=return checkClass(listClass, getSuper(listClass, c)); //a faire arg(super) = arg(fille) }
+        { herOk=checkHeritage(listClass, c);}
 
-    if(nomOk && metOk && varOk && herOk)
+    if(nomOk && metOk && varOk && herOk && consOk)
         { return TRUE;}
     return FALSE;
 }
@@ -407,28 +430,18 @@ bool checkVar(VarDeclP v)
 }
 
 //Autre
-ClassP getSuper(ClassP listClass, ClassP c)
-{
-    if(listClass==NULL || c==NULL)
-            {abort();}
-    if( doesClassExist(listClass,c->super) )
-        {return getClass(listClass, c->super);}
-    abort();
-}
-
 ClassP getClass(ClassP listC, char *name)
 {
-    if(lsitC==NULL || name==NULL)
-        {abort();}
+    if(listC==NULL || name==NULL)
+        {abort();} /* Ne devrait pas se produire si doesClassExist() a bien été appelée avant*/
     ClassP temp=listC;
     while(temp!=NULL)
     {
         if(strcmp(name,temp->name)==0)
-        {
-            return temp;
-        }
+            { return temp; }
+        temp=temp->next;
     }
-    abort();
+    return NULL;
 }
 
 MethodP getMethod(MethodP m, ClassP c)
@@ -438,7 +451,8 @@ MethodP getMethod(MethodP m, ClassP c)
     MethodP temp=c->method;
     while(temp!=NULL)
     {
-        if(strcmp(m->name, temp->name)==0)
+        if(areMethodsTheSame(temp,m)==TRUE)
             {return temp;}
     }
+    return NULL;
 }
