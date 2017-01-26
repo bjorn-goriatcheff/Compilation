@@ -14,13 +14,13 @@
 %left AND
 %left DOT
 
-%type <pT> Prog  classLOpt block isBlock isNotBlock expression opexpr bexpr instanc message select cast paramList paramListOpt inst affInst instListOpt instList initInstOpt param initBlockOpt typeOpt
+%type <pT> Prog  classLOpt block isBlock isNotBlock expression opexpr bexpr instanc message select cast paramList paramListOpt inst affInst instListOpt instList initInstOpt initBlockOpt typeOpt
 %type <B> overOpt
 %type <pV> declList declListOpt decl paramOpt argList arg
-%type <pC> classHeader classDecl
+%type <pC> classHeader classDecl param
 %type <S>  extOpt
 %type <pM> methHeader  meth methListOpt
-%type <pCo> classBlock
+
 
 %{
 #include "tp.h"
@@ -40,14 +40,14 @@ classLOpt: { $$ = NIL(Tree); }
 | classDecl classLOpt // Liste des classes
 ;
 
-classDecl: classHeader IS classBlock  //remplissage de la classe FILL                 ///recuperer declList et methList (grammaire issue)
+classDecl: classHeader IS '{' declListOpt methListOpt'}'   //remplissage de la classe FILL                 ///recuperer declList et methList (grammaire issue)
 ;
 /* initblockOpt a faire */
 classHeader: CLASS param extOpt initBlockOpt  //création de la class makeClass
 ;
 
 extOpt: { $$ = NIL(char); }
-| EXTENDS TYPE '(' paramListOpt ')' { $$ = $2; } // on ignore paramLopt
+| EXTENDS TYPE '(' paramListOpt ')' { $$ = $2; } // on ignore paramLopt et on renvoie un char
 ;
 /* makeBlock */
 block: '{' instListOpt '}' { $$ = makeBlock(NIL(VarDecl) ,$2); }
@@ -78,9 +78,6 @@ declListOpt: { $$ = NIL(VarDecl); }
 decl: VAR Id ':' TYPE initInstOpt ';' { $$ = makeVarDecl($2 , $4, $5); }
 ;
 
-
-classBlock: '{' declListOpt methListOpt'}' { $$ = makeCorps($2, $3); }
-;
 
 methListOpt: { $$ = NIL(Method); }
 | meth methListOpt { $1->next=$2; $$=$1;}
@@ -167,7 +164,7 @@ param: TYPE '(' paramOpt ')' { $$ = makeClass($1, $3, NIL(char)); }
 ;
 
 paramOpt: { $$ = NIL(VarDecl); }
-| argList
+| argList 
 ;
 
 argList: arg
