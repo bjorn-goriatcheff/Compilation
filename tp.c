@@ -219,8 +219,10 @@ ClassP makeClass(TeteP tete, char* super, TreeP bloc){
 	return(classe);
 }
 
-void makeProg(ClassP listC, MethodP listM) {
-
+void makeProg(ClassP listC, TreeP bloc) {
+	//VERIFICATIONS CONTEXTUELLES
+	
+	// CODE GENERATION
 }
 
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
