@@ -158,6 +158,6 @@ MethodP makeMeth(char* name, VarDeclP args);
 TreeP makeBlock(VarDeclP decl, TreeP instr);
 MethodP fillMeth(MethodP meth, TreeP bloc);
 CorpP makeCorps(VarDeclP decl, MethodP meth);
-ClassP makeClass(char* name, VarDeclP var, Class* super);
+ClassP makeClass(char* name, VarDeclP var, char* super);
 void makeProg(ClassP listC, MethodP listM);
 #endif
