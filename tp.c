@@ -208,9 +208,12 @@ TeteP makeTete(char* nom, VarDeclP var)
     return(tete);
 }
 
-ClassP makeClass(char* name, VarDeclP var, char* super){
+ClassP makeClass(TeteP tete, char* super, TreeP bloc){
 	ClassP classe = NEW(1, Class);
-	classe->var=var;
+	classe->name=tete->type;
+	classe->constructor->name=tete->type;
+	classe->constructor->body=bloc;
+	classe->constructor->args=tete->var;
 	classe->super=super; // nom de la classe et pas la structure
 	classe->next=NIL(Class);
 	return(classe);
