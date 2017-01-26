@@ -34,7 +34,7 @@ extern void yyerror(char *);
 %}
 
 %%
-Prog : classLOpt block { $$ = makeProg(PROG, 2, $1, $2); lvar=NEW (0, VarDecl); }; // A FAIRE MAKEPROG
+Prog : classLOpt block {  lvar=NEW (0, VarDecl); }; // A FAIRE MAKEPROG
 
 classLOpt: { $$ = NIL(Tree); }
 | classDecl classLOpt // Liste des classes
@@ -94,10 +94,10 @@ overOpt: { $$ = FALSE; }
 | OVERRIDE {  $$ = TRUE; }
 ;
 // regler l'affectation
-isNotBlock: ':' TYPE AFF expression { $4->u.children[$4->nbChildren]=makeLeafStr(TYPE, $2); $$=$4;}
+isNotBlock: ':' TYPE AFF expression { $$ = makeTree(AFF , 2, makeLeafStr(TYPE, $2), $4);} 
 ;
 
-isBlock: typeOpt IS block { $1->u.children[1]=$3; $1->nbChildren+=1; $$=$1; }
+isBlock: typeOpt IS block { $$ = makeTree(IS, 2, $1, $3); }
 ;
 
 typeOpt: { $$ = makeLeafStr(TYPE, NIL(char)); }
@@ -158,6 +158,7 @@ opexpr: expression ADD expression		{ $$ = makeTree(EADD, 2, $1, $3); }
 | expression SUB expression 			{ $$ = makeTree(EMINUS, 2, $1, $3); }
 | expression MUL expression 			{ $$ = makeTree(EMULT, 2, $1, $3); }
 | expression DV expression 			{ $$ = makeTree(EDIV, 2, $1, $3); }
+;
 
 bexpr: expression RelOp expression 		{ $$ = makeTree($2, 2, $1, $3); }
 ;
