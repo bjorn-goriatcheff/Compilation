@@ -193,6 +193,13 @@ MethodP fillMeth(MethodP meth, TreeP bloc){
 	return meth;
 }
 
+ClassP fillClass(ClassP class, char* super, TreeP bloc){
+	class->super = super;
+	MethodP tampon = makeMeth(class->name, class->var);
+	class->constructor = fillMeth(tampon, bloc);
+	return class;
+}
+
 CorpP makeCorps(VarDeclP var, MethodP method)
 {
     CorpP corps = NEW(1, Corps);
