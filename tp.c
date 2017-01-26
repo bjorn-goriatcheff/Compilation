@@ -201,10 +201,10 @@ CorpP makeCorps(VarDeclP var, MethodP method)
     return(corps);
 }
 
-ClassP makeClass(char* name, VarDeclP var, Class* super){
+ClassP makeClass(char* name, VarDeclP var, char* super){
 	ClassP classe = NEW(1, Class);
 	classe->var=var;
-	classe->super=super->name; // nom de la classe et pas la structure
+	classe->super=super; // nom de la classe et pas la structure
 	classe->next=NIL(Class);
 	return(classe);
 }
