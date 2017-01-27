@@ -126,7 +126,7 @@ typedef union
 	VarDeclP pV;
 	ClassP pC;
 	MethodP pM;
-	CorpP pCo;
+	TeteP PTe;
 } YYSTYPE;
 
 #define YYSTYPE YYSTYPE
@@ -157,8 +157,8 @@ VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
 MethodP makeMeth(char* name, VarDeclP args);
 TreeP makeBlock(VarDeclP decl, TreeP instr);
 MethodP fillMeth(MethodP meth, TreeP bloc);
-ClassP makeClass(char* name, VarDeclP var, char* super);
+ClassP makeClass(TeteP tete, char* super, TreeP bloc);
 TeteP makeTete(char* nom, VarDeclP var);
 
-void makeProg(ClassP listC, MethodP listM);
+void makeProg(ClassP listC, TreeP bloc);
 #endif
