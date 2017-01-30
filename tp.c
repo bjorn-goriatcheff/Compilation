@@ -211,6 +211,7 @@ TeteP makeTete(char* nom, VarDeclP var)
 ClassP makeClass(TeteP tete, char* super, TreeP bloc){
 	ClassP classe = NEW(1, Class);
 	classe->name=tete->type;
+	classe->constructor = NEW(1, Method);
 	classe->constructor->name=tete->type;
 	classe->constructor->body=bloc;
 	classe->constructor->args=tete->var;
