@@ -126,7 +126,7 @@ typedef union
 	VarDeclP pV;
 	ClassP pC;
 	MethodP pM;
-	TeteP PTe;
+	TeteP pTe;
 } YYSTYPE;
 
 #define YYSTYPE YYSTYPE
