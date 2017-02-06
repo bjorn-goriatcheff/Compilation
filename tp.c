@@ -223,6 +223,7 @@ ClassP makeClass(TeteP tete, char* super, TreeP bloc){
 }
 
 void makeProg(ClassP listC, TreeP bloc) {
+	printTree(bloc, 0);
 	//VERIFICATIONS CONTEXTUELLES
 	
 	// CODE GENERATION
@@ -318,4 +319,91 @@ int getValue(TreeP tree, VarDeclP decls) {
 	}
 }	
 
+/* tree : l'ast d'une expression 
+ * d : liste des variables déjà déclarées avec une valeur
+*/
+void printTree(TreeP tree, int compteur)
+{
+	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
+	printf("\nprofondeur: %d\n ", compteur);
+	compteur++;
+	switch (tree->op)
+	{
+		
+		case IDVAR: 
+			printf("IDVAR: %s ", tree->u.str);
 
+			break;
+		case Id:
+			printf("Id: %s ", tree->u.str);
+
+			break;
+		case Cste : 
+			printf("Cste: %d ", tree->u.val);
+
+			break;
+		case EQ: 
+			printf("\nEQ: ");
+			printTree(getChild(tree,0),compteur);
+			printf("  ,  ");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		case NE: 
+			printf("\nNE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		case LT : 
+			printf("\nLT: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case LE: 
+			printf("\nLE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case GT:
+			printf("\nGT: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case GE :
+			printf("\nGE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case ITE : 
+			printf("\nITE: ");
+
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+			printf("\t");
+
+			printTree(getChild(tree,2),compteur);
+		
+			break;
+		case EADD: case EMINUS:  case EMULT : case EDIV : 
+			printf("\nADD/MIN/MULT/DIV: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		default:
+			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
+			exit(UNEXPECTED);
+	}
+}
