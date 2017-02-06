@@ -223,7 +223,6 @@ ClassP makeClass(TeteP tete, char* super, TreeP bloc){
 }
 
 void makeProg(ClassP listC, TreeP bloc) {
-	printTree(bloc, 0);
 	//VERIFICATIONS CONTEXTUELLES
 	
 	// CODE GENERATION
@@ -322,7 +321,7 @@ int getValue(TreeP tree, VarDeclP decls) {
 /* tree : l'ast d'une expression 
  * d : liste des variables déjà déclarées avec une valeur
 */
-void printTree(TreeP tree, int compteur)
+/*void printTree(TreeP tree, int compteur)
 {
 	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
 	printf("\nprofondeur: %d\n ", compteur);
@@ -406,7 +405,7 @@ void printTree(TreeP tree, int compteur)
 			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
 			exit(UNEXPECTED);
 	}
-}
+}*/
 
 ClassP getClass(ClassP listC, char *name)
 {

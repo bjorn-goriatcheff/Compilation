@@ -14,9 +14,9 @@
 %left AND
 %left DOT
 
-%type <pT> Prog classDecl classLOpt block isBlock isNotBlock expression opexpr bexpr instanc message select cast paramList paramListOpt inst affInst instListOpt instList classBlock initInstOpt param initBlockOpt argList arg
+%type <pT> Prog classDecl classLOpt block isBlock isNotBlock expression opexpr bexpr instanc message select cast paramList paramListOpt inst affInst instListOpt instList classBlock initInstOpt construct initBlockOpt argList arg
 %type <B> overOpt
-%type <pV> declList declListOpt decl paramOpt
+%type <pV> declList declListOpt decl argListOpt
 %type <pC> classHeader
 %type <S>  typeOpt extOpt
 %type <pM> methHeader  meth methListOpt
@@ -105,7 +105,7 @@ typeOpt: { $$ = NIL(char); }
 | ':' TYPE { $$ = $2; }
 ;
 
-methHeader: DEF Id '(' paramOpt ')' { $$ = makeMeth($2, $4); }
+methHeader: DEF Id '(' argListOpt ')' { $$ = makeMeth($2, $4); }
 ;
 
 initInstOpt: { $$ = NIL(Tree); }
