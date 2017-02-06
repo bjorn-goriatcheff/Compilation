@@ -161,4 +161,5 @@ ClassP makeClass(TeteP tete, char* super, TreeP bloc);
 TeteP makeTete(char* nom, VarDeclP var);
 
 void makeProg(ClassP listC, TreeP bloc);
+ClassP getClass(ClassP listC, char *name)
 #endif
