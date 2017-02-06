@@ -149,6 +149,7 @@ TreeP makeLeafStr(short op, char *str) {
   return tree;
 }
 
+
 /* Constructeur de feuille dont la valeur est un entier */
 TreeP makeLeafInt(short op, int val) {
   TreeP tree = makeNode(0, op) ;
@@ -156,12 +157,14 @@ TreeP makeLeafInt(short op, int val) {
   return(tree);
 }
 
+
 /* Constructeur feuille dont la valeur est une variable */
 TreeP makeLeafLVar(short op, VarDeclP lvar) {
   TreeP tree = makeNode(0, op) ;
   tree->u.lvar = lvar;
   return(tree);
 }
+
 
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
  * l'environnement la valeur des variables referencee
@@ -278,43 +281,46 @@ MethodP makeMeth(char* name, VarDeclP args) {
 	return nouv;
 }
 
-ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, bool inherited, char* sup ){
+ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, bool inh, char* sup ){
 	ClassP classe = NEW(1, Class);
     classe->name=name;
     classe->var=var;
     classe->method=meth;
     classe->constructor=cons;
+    classe->inherited=inh;
     classe->super=sup;
     classe->next=NULL;
 	return(classe);
 }
 
-
-
 /*Vérifications Contextuelles*/
-bool areClassTheSame(ClassP c1, ClassP c2)
-{
-    if(c1==NULL || c2==NULL)
-        { abort(); }
-    else if(strcmp(c1->name,c2->name)==0 && areVarTheSame(c1->var,c2->var) && areMethodsTheSame(c1->method , c2->method) && c1->isInherited ==
-    c2->isInherited  && strcmp(c1->super,c2->super) && areMethodsTheSame(c1->constructor,c2->constructor))
-        { return TRUE; }
-    return FALSE;
-}
+// bool areClassTheSame(ClassP c1, ClassP c2)
+// {
+    // if(c1==NULL || c2==NULL)
+        // { abort(); }
+    // else if(strcmp(c1->name,c2->name)==0 && areVarTheSame(c1->var,c2->var) && areMethodsTheSame(c1->method , c2->method) && c1->isInherited ==
+    // c2->isInherited  && strcmp(c1->super,c2->super) && areMethodsTheSame(c1->constructor,c2->constructor))
+        // { return TRUE; }
+    // return FALSE;
+// }
 
 bool areMethodsTheSame(MethodP ma, MethodP mb)
 {
-    if(ma==NULL || mb==NULL)
-        { abort(); }
-    else if(strcmp(ma->name,mb->name)==0 && areVarTheSame(ma->args,mb->args) && strcmp(ma->type,mb->type)==0    )
+    if(ma==NULL && mb==NULL)
+        { return TRUE; }
+	if( ma==NULL || mb==NULL )
+		{ return FALSE; }
+    if(strcmp(ma->name,mb->name)==0 && areVarTheSame(ma->args,mb->args) && strcmp(ma->type,mb->type)==0    )
         {   return areMethodsTheSame(ma->next,mb->next) ;}
     return FALSE;
 }
 
 bool areVarTheSame(VarDeclP va, VarDeclP vb)
 {
-    if( (va==NULL && vb!=NULL) || (va!=NULL && vb==NULL)  )
-        {return FALSE;}
+	if( va==NULL && vb==NULL)
+		{return TRUE;}
+	if( va==NULL || vb==NULL)
+		{ return FALSE;}
     if(strcmp(va->name,vb->name)==0 && strcmp(va->varType,vb->varType)==0 && va->expr==vb->expr   )
         {return areVarTheSame(va->next,vb->next);}
     return FALSE;
@@ -334,22 +340,34 @@ bool doesClassExist(ClassP lClass, char* cName)
     return FALSE;
 }
 
-bool isMethodInClass(MethodP met, ClassP cl)
+/** Renvoie TRUE si la méthode appartient à une classe ou sa classe mère, FALSE sinon
+ *      met : la methode recherchee
+ *      cl : la classe où on cherche la methode
+ *      lClass : liste des classes du prgm
+**/
+bool isMethodInClass(MethodP met, ClassP cl, ClassP lClass)
 {
-    if(met==NULL || cl==NULL)
+    if(met==NULL)
         { abort(); }
 	MethodP temp;
 	temp = cl->method;
+	/* on cherche dans la classe donnée */
 	while(temp != NULL)
 	{
-		if(areMethodsTheSame(temp,met) )
+		if(areMethodsTheSame(temp,met))
             { return TRUE; }
 		temp=temp->next;
 	}
-	return FALSE;
+	/* Si on ne l'a pas trouvée, on cherche dans la classe super */
+	if (c->isInherited==FALSE;)
+    {
+        return FALSE;
+    }
+	return isMethodInClass(met, getClass(lClass, cl->super), lClass );
 }
 
-bool isVarInMethod(VarDeclP v, MethodP m)
+
+bool isArgInMethod(VarDeclP v, MethodP m)
 {
     if(v==NULL || m==NULL)
         {abort();}
@@ -362,29 +380,49 @@ bool isVarInMethod(VarDeclP v, MethodP m)
     }
     return FALSE;
 }
-bool checkHeritage(ClassP listClass, ClassP c)
-{ /* la classe super est bonne + les var de la super sont dans la classe fille*/
-        ClassP sup= getClass(listClass,c->super);
-        VarDeclP tempM = sup->var;
-        VarDeclP tempF=c->var;
-        while(tempM != NULL){
-            if(tempF==NULL)
-                {return FALSE;}
-            else if(areVarTheSame(tempM,tempF)==FALSE)
-                {tempF=tempF->next;}
-            else if(areVarTheSame(tempM,tempF)==TRUE)
-            {   tempM = tempM->next;
-                tempF = c->var;
-            }
-            else
-                {abort();}
-        }
-        return checkClass(listClass, sup )==TRUE;
+
+bool isVarInClass(VarDeclP v, ClassP c, ClassP lClass)
+{
+    if(v==NULL || c==NULL || lClass == NULL)
+        { abort(); }
+    VarDeclP temp=c->var;
+    while(temp!=NULL)
+    {
+        if(areVarTheSame(temp,v))
+            {return TRUE;}
+        temp=temp->next;
+    }
+    return FALSE;
 }
+
+
+/* Renvoie TRUE si toutes les var de la super sont dans la classe et si la super et bien construite
+ *  FALSE sinon
+ *      listclass : list des classes dispo
+ *      c : classe à vérifier
+*/
+//bool checkHeritage(ClassP listClass, ClassP c)
+//{ /* la classe super est bonne + les var de la super sont dans la classe fille*/
+//        ClassP sup= getClass(listClass,c->super);
+//        VarDeclP tempM = sup->var;
+//        VarDeclP tempF=c->var;
+//        while(tempM != NULL){
+//            if(tempF==NULL)
+//                {return FALSE;}
+//            else if(areVarTheSame(tempM,tempF)==FALSE)
+//                {tempF=tempF->next;}
+//            else if(areVarTheSame(tempM,tempF)==TRUE)
+//            {   tempM = tempM->next;
+//                tempF = c->var;
+//            }
+//            else /* on devrait obligatoirement passer dans l'un des if d'en haut */
+//                {abort();}
+//        }
+//        return checkClass(listClass, sup )==TRUE;
+//}
 
 bool checkClass(ClassP listClass, ClassP c)
 {
-        //?????????????????????check next ????????????
     bool nomOk,varOk,metOk, consOk, herOk;
     if( c->name!=NULL && c->name[0] >= 'A' && c->name[0] <= 'Z' )
         { nomOk=TRUE; }
@@ -396,8 +434,9 @@ bool checkClass(ClassP listClass, ClassP c)
     if(c->super==NULL)
         { herOk=TRUE;}
     else
-        { herOk=checkHeritage(listClass, c);}
-
+        { //herOk=checkHeritage(listClass, c);
+            herOk=checkClass(listClass, getClass(listClass, c->super) );
+        }
     if(nomOk && metOk && varOk && herOk && consOk)
         { return TRUE;}
     return FALSE;

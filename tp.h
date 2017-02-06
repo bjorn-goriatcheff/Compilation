@@ -157,8 +157,9 @@ bool areMethodsTheSame(MethodP ma,MethodP mb);
 bool areVarTheSame(VarDeclP va, VarDeclP vb);
 
 bool doesClassExist(ClassP listClass, char* name);
-bool isMethodInClass(MethodP m,ClassP c);
-bool isVarInMethod(VarDeclP v, MethodP m);
+bool isMethodInClass(MethodP m,ClassP c, ClassP listClass);
+bool isArgInMethod(VarDeclP v, MethodP m);
+bool isVarInClass(VarDeclP v, ClassP c, ClassP listClass);
 
 bool checkClass(ClassP listClass, ClassP c);
 bool checkMethods(ClassP c);
