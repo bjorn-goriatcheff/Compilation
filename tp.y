@@ -81,9 +81,9 @@ decl: VAR Id ':' TYPE initInstOpt ';' { $$ = makeVarDecl($2 , $4, $5); }
 methListOpt: { $$ = NIL(Method); }
 | meth methListOpt { $1->next=$2; $$=$1;}
 ;
-//A faire overopt dans fillMeth
-meth: overOpt methHeader isBlock { $$=fillMeth($2, $3);}
-| overOpt methHeader isNotBlock { $$=fillMeth($2, $3);}
+
+meth: overOpt methHeader isBlock { $$=fillMeth($2, $3, $1);}
+| overOpt methHeader isNotBlock { $$=fillMeth($2, $3, $1);}
 ;
 
 overOpt: { $$ = FALSE; }

@@ -100,6 +100,7 @@ struct _Method {
 	VarDeclP args;
 	TreeP body;
 	char* type;
+	bool over;
 	struct _Method *next;
 };
 
@@ -156,10 +157,17 @@ int getValue(TreeP tree, VarDeclP var);
 VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
 MethodP makeMeth(char* name, VarDeclP args);
 TreeP makeBlock(VarDeclP decl, TreeP instr);
-MethodP fillMeth(MethodP meth, TreeP bloc);
+MethodP fillMeth(MethodP meth, TreeP bloc, bool over);
 ClassP makeClass(TeteP tete, char* super, TreeP bloc);
 TeteP makeTete(char* nom, VarDeclP var);
 
+void printClass(ClassP list);
+
 void makeProg(ClassP listC, TreeP bloc);
 ClassP getClass(ClassP listC, char *name);
+
+//verifs
+bool circuitHeritage(ClassP list, ClassP listTemp);
+bool checkOverride(ClassP list, ClassP listTemp);
+bool checkSuper(ClassP class, MethodP method, ClassP list);
 #endif
