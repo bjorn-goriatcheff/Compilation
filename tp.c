@@ -411,7 +411,7 @@ void printTree(TreeP tree, int compteur)
 ClassP getClass(ClassP listC, char *name)
 {
     if(listC==NULL || name==NULL)
-        {abort();} /* Ne devrait pas se produire si doesClassExist() a bien été appelée avant*/
+        {abort();}
     ClassP temp=listC;
     while(temp!=NULL)
     {
