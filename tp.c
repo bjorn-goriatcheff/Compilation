@@ -184,6 +184,8 @@ TreeP makeBlock(VarDeclP var, TreeP inst)
 
 MethodP makeMeth(char* name, VarDeclP args) { 
 	MethodP nouv = NEW(1, Method);
+	nouv->name = name;
+	nouv->args = args;
 	return nouv; 
 }
 
