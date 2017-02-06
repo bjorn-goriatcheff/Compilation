@@ -407,3 +407,17 @@ void printTree(TreeP tree, int compteur)
 			exit(UNEXPECTED);
 	}
 }
+
+ClassP getClass(ClassP listC, char *name)
+{
+    if(listC==NULL || name==NULL)
+        {abort();} /* Ne devrait pas se produire si doesClassExist() a bien été appelée avant*/
+    ClassP temp=listC;
+    while(temp!=NULL)
+    {
+        if(strcmp(name,temp->name)==0)
+            { return temp; }
+        temp=temp->next;
+    }
+    return NULL;
+}
