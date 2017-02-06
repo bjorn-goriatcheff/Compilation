@@ -14,14 +14,13 @@
 %left AND
 %left DOT
 
-%type <pT> Prog block isBlock isNotBlock expression opexpr bexpr instanc message select cast inst affInst instListOpt instList initInstOpt initBlockOpt typeOpt paramList paramListOpt 
-
+%type <pT> Prog classDecl classLOpt block isBlock isNotBlock expression opexpr bexpr instanc message select cast paramList paramListOpt inst affInst instListOpt instList classBlock initInstOpt param initBlockOpt argList arg
 %type <B> overOpt
-%type <pV> declList declListOpt decl paramOpt argList arg
-%type <pC> classHeader classDecl classLOpt
-%type <S>  extOpt
+%type <pV> declList declListOpt decl paramOpt
+%type <pC> classHeader
+%type <S>  typeOpt extOpt
 %type <pM> methHeader  meth methListOpt
-%type <pTe> param 
+
 %{
 #include "tp.h"
 #include "tp_y.h"
@@ -34,22 +33,22 @@ extern void yyerror(char *);
 %}
 
 %%
-Prog : classLOpt block {  makeProg($1, $2);};
+Prog : classLOpt block { $$ = makeTree(PROG, 2, $1, $2); lvar=NEW (0, VarDecl); };
 
-classLOpt: { $$ = NIL(Class); }
-| classDecl classLOpt { $1->next=$2; $$=$1; }
+classLOpt: { $$ = NIL(Tree); }
+| classDecl classLOpt 
 ;
 
-classDecl: classHeader IS '{' declListOpt methListOpt'}'   { $1->var=$4; $1->method=$5; $$=$1; }
+classDecl: classHeader IS classBlock 
 ;
 /* initblockOpt a faire */
-classHeader: CLASS param extOpt initBlockOpt  { $$ = makeClass($2, $3, $4); } // FILL class 
+classHeader: CLASS construct extOpt initBlockOpt 
 ;
 
 extOpt: { $$ = NIL(char); }
-| EXTENDS TYPE '(' paramListOpt ')' { $$ = $2; } // on ignore paramLopt et on renvoie un char
+| EXTENDS TYPE '(' paramListOpt ')' { $$ = $2; } // on ignore paramLopt
 ;
-
+/* makeBlock */
 block: '{' instListOpt '}' { $$ = makeBlock(NIL(VarDecl) ,$2); }
 | '{' declList IS instList '}' { $$ = makeBlock($2, $4); }
 ;
@@ -60,6 +59,8 @@ instList: inst instListOpt { $$ = makeTree(INST, 2, $1, $2 ); }
 instListOpt: { $$ = NIL(Tree); }
 | instList 
 ;
+
+
 
 inst: expression ';'		
 | block
@@ -78,39 +79,45 @@ declListOpt: { $$ = NIL(VarDecl); }
 decl: VAR Id ':' TYPE initInstOpt ';' { $$ = makeVarDecl($2 , $4, $5); }
 ;
 
+
+classBlock: '{' declListOpt methListOpt'}' 
+;
+
 methListOpt: { $$ = NIL(Method); }
 | meth methListOpt { $1->next=$2; $$=$1;}
 ;
-//A faire overopt dans fillMeth
-meth: overOpt methHeader isBlock { $$=fillMeth($2, $3);}
-| overOpt methHeader isNotBlock { $$=fillMeth($2, $3);}
+
+meth: overOpt methHeader isBlock { $2->type=$3->u.children[0]->u.str; $2->body=$3->u.children[1]; $$=$2; }
+| overOpt methHeader isNotBlock { $2->type=$3->u.children[0]->u.str; $2->body=$3->u.children[1]; $$=$2; }
 ;
 
 overOpt: { $$ = FALSE; }
 | OVERRIDE {  $$ = TRUE; }
 ;
-
-isNotBlock: ':' TYPE AFF expression { $$ = makeTree(AFF , 2, makeLeafStr(TYPE, $2), $4);} 
+// regler l'affectation
+isNotBlock: ':' TYPE AFF expression { $$ = makeTree(ISNOTBLOCK, 2, $2, $4); }
 ;
 
-isBlock: typeOpt IS block { $$ = makeTree(IS, 2, $1, $3); }
+isBlock: typeOpt IS block { $$ = makeTree(ISBLOCK, 2, $1, $3); }
 ;
 
-typeOpt: { $$ = makeLeafStr(TYPE, NIL(char)); }
-| ':' TYPE { $$ = makeLeafStr(TYPE, $2); }
+typeOpt: { $$ = NIL(char); }
+| ':' TYPE { $$ = $2; }
 ;
 
 methHeader: DEF Id '(' paramOpt ')' { $$ = makeMeth($2, $4); }
 ;
 
 initInstOpt: { $$ = NIL(Tree); }
-| AFF expression { $$ = makeTree(AFFEC,1,$2); }
+| AFF expression
 ;
+
+
 
 initBlockOpt: { $$ = NIL(Tree); }
 | block 
 
-affInst: expression AFF expression ';' { $$ = makeTree(AFF, 2, $1, $3); }
+affInst: expression AFF expression ';'
 ;
 
 expression: Id						{ $$ = makeLeafStr(IDVAR, $1); }
@@ -134,7 +141,7 @@ message: expression DOT Id '(' paramListOpt ')'      { $$ = makeTree(DOT,3, $1, 
 instanc: NEWW TYPE '(' paramListOpt ')'      { $$ = makeTree(NEWW, 2, $2, $4) ;}        
 ; 
 
-paramListOpt: { $$=NIL(Tree);}		
+paramListOpt: 		{}		
 | paramList				
 ;
 
@@ -152,21 +159,20 @@ opexpr: expression ADD expression		{ $$ = makeTree(EADD, 2, $1, $3); }
 | expression SUB expression 			{ $$ = makeTree(EMINUS, 2, $1, $3); }
 | expression MUL expression 			{ $$ = makeTree(EMULT, 2, $1, $3); }
 | expression DV expression 			{ $$ = makeTree(EDIV, 2, $1, $3); }
-;
 
 bexpr: expression RelOp expression 		{ $$ = makeTree($2, 2, $1, $3); }
 ;
 
-param: TYPE '(' paramOpt ')' { $$ = makeTete($1, $3); }
+construct: TYPE '(' argListOpt ')' { $$ = makeTree(TYPE, 1, $3); }
 ;
 
-paramOpt: { $$ = NIL(VarDecl); }
-| argList 
+argListOpt: { $$ = NIL(VarDecl); }
+| argList
 ;
 
 argList: arg
-| arg ',' argList { $1->next=$3; $$=$1;}
+| arg ',' argList { $$ = makeTree(ARGLIST, 2, $1, $3); }
 ;
 
-arg: Id ':' TYPE { $$ = makeVarDecl($1, $3, NIL(Tree)); }
+arg: Id ':' TYPE { $$ = makeTree(Id, 1, $3); }
 ;
