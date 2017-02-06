@@ -28,10 +28,27 @@ bool noEval = FALSE;
 
 FILE *out; /* fichier de sortie pour le code engendre */
 
+TreeP program;
+ClassP listClassPrgm;
 
 int main(int argc, char **argv)
 {
+        //Initialisation
+    listClassPrgm=NULL;
 
+        //Création des classes prédéfinies
+    ClassP Void = makeClass("Void", NULL,NULL,NULL,0,NULL);
+    ClassP Integer = makeClass("Integer", NULL, NULL, 0, NULL);
+    ClassP String = makeClass("String",NULL, NULL, NULL, 0,NULL);
+    String->next=Void;
+    Integer->next=String;
+    Void->next=NULL;
+    listClassPrgm=Integer;
+
+    MethodP toString = makeMeth("toString",NIL(Tree),NIL(VarDecl),String->name);
+    MethodP print = makeMeth("print", NIL(Tree), NIL(VarDecl), String->name);
+    toString->next=NULL;
+    print->next=NULL;
 
   int fi;
   int i, res;
@@ -276,8 +293,10 @@ TreeP makeBlock(VarDeclP var, TreeP inst)
 	return(tree);
 }
 
-MethodP makeMeth(char* name, VarDeclP args) {
+MethodP makeMeth(char* name, TreeP bod,  VarDeclP args, char* typret) {
 	MethodP nouv = NEW(1, Method);
+	nouv->name=name;
+	nouv->
 	return nouv;
 }
 

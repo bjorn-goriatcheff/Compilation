@@ -147,7 +147,7 @@ int getValue(TreeP tree, VarDeclP var);
 
 //Remplissage de structures
 VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
-MethodP makeMeth(char* name, VarDeclP args);
+MethodP makeMeth(char* name, TreeP body, VarDeclP args, char* typeRet);
 TreeP makeBlock(VarDeclP decl, TreeP instr);
 ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons,bool inherited, char* super);
 
