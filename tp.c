@@ -224,7 +224,7 @@ ClassP makeClass(TeteP tete, char* super, TreeP bloc){
 }
 
 void makeProg(ClassP listC, TreeP bloc) {
-	printClass(listC);
+	//printClass(listC);
 	//VERIFICATIONS CONTEXTUELLES
 	if(!circuitHeritage(listC, listC)) abort(); // verif circuit d'heritage
 	if(!checkOverride(listC, listC)) abort(); // verif des overrides
@@ -411,93 +411,4 @@ int getValue(TreeP tree, VarDeclP decls) {
 	}
 }*/
 
-ClassP getClass(ClassP listC, char *name)
-{
-    ClassP temp=listC;
-    while(temp!=NULL)
-    {
-        if(strcmp(name, temp->name)==0)
-            { return temp; }
-        temp=temp->next;
-    }
-    printf("\nClasse %s non existante...\n", name);
-    abort();
-}
 
-bool checkOverride(ClassP list, ClassP listTemp){
-	if(list != NULL) {
-		bool retour = checkOverride(list->next, listTemp);
-		
-		if(list->super != NULL) {
-			MethodP temp = list->method;
-			
-			while(temp != NULL) {
-				if(temp->over) {printf("\nPresence d'un override dans la classe %s qui n'a pas de super\n", list->name); return FALSE;}
-				temp = temp->next;
-			}
-		}
-		
-		else {
-			MethodP temp = list->method;
-			
-			while(temp != NULL) {
-				if(temp->over && !checkSuper(list, temp, listTemp)) {printf("\nAucune methode correspondant a %s dans le(s) super(s)\n", list->method->name); return FALSE;}
-				temp = temp->next;
-			}
-			
-			return retour;
-		}	
-	}
-	
-	return TRUE;	
-}
-
-bool checkSuper(ClassP class, MethodP method, ClassP list) {
-	if(class != NULL) {
-		ClassP super = getClass(list, class->super);
-		bool retour = checkSuper(super, method, list);
-		
-		while(class->method != NULL) {
-			if(strcmp(method->name, class->method->name)==0) {
-				if(strcmp(method->type, class->method->type)==0) {
-					VarDeclP argTemp = method->args;
-					VarDeclP argTempClass = class->method->args;
-					while(argTemp != NULL && argTempClass != NULL) {
-						if(strcmp(argTemp->varType, argTempClass->varType)!=0) return FALSE;
-						argTemp = argTemp->next;
-						argTempClass = argTempClass->next;
-					}
-				}
-			}
-			return retour;
-		}
-	}
-	return TRUE;
-}
-
-bool circuitHeritage(ClassP list, ClassP listTemp) {
-	if(list != NULL) {
-		bool retour = circuitHeritage(list->next, listTemp);
-		
-		ClassP temp = list;
-		char* nomTemp = list->name;
-
-		while(temp->super != NULL) {
-			if(strcmp(nomTemp, temp->super)==0) {printf("\nCircuit d'heritage repere...\n"); return FALSE;}
-			temp=getClass(listTemp, temp->super);
-		}
-		
-		return retour;
-	}
-	
-	return TRUE;
-}
-
-void printClass(ClassP list) {
-	ClassP temp = list;
-
-	while(temp != NULL) {
-		printf(temp->name);
-		temp=temp->next;
-	}
-}
