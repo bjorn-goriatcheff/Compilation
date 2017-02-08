@@ -182,7 +182,7 @@ TreeP makeBlock(VarDeclP var, TreeP inst)
 	return(tree);
 }
 
-MethodP makeMeth(char* name, VarDeclP args) { 
+MethodP makeMeth(char* name, VarDeclP args) {
 	MethodP nouv = NEW(1, Method);
 	nouv->name = name;
 	nouv->args = args;
@@ -224,12 +224,23 @@ ClassP makeClass(TeteP tete, char* super, TreeP bloc){
 }
 
 void makeProg(ClassP listC, TreeP bloc) {
-	//printClass(listC);
+	attribSuper(listC);
 	//VERIFICATIONS CONTEXTUELLES
-	if(!circuitHeritage(listC, listC)) abort(); // verif circuit d'heritage
-	if(!checkOverride(listC, listC)) abort(); // verif des overrides
+	if(circuitHeritage(listC)) setError(CONTEXT_ERROR); // verif circuit d'heritage
+	if(pbOverride(listC)) setError(CONTEXT_ERROR); // verif des overrides
 	
+	if(errorCode != NO_ERROR) printf("\nVerifications contextuelles echouees !\n");
+	else printf("\nVerifications contextuelles reussies !\n");
 	// CODE GENERATION
+}
+
+void attribSuper(ClassP list) { //complete le champ superC avec la classe correspondante au champ super
+	ClassP temp = list;
+	
+	while(temp != NULL) {
+	temp->superC = getClass(list, temp->super);
+	temp = temp->next;
+	}
 }
 
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans

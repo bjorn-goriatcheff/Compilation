@@ -110,6 +110,7 @@ struct _Class {
 	MethodP method;
 	MethodP constructor;
 	char* super;
+	ClassP superC;
 	struct _Class *next;
 };
 
@@ -149,7 +150,6 @@ VarDeclP evalDecls (TreeP tree);
 int eval(TreeP tree, VarDeclP decls);
 int evalMain(TreeP tree, VarDeclP decls);
 int evalIf(TreeP tree,VarDeclP decls);
-bool isMethodInClass(Class cl, Method met);
 int getValue(TreeP tree, VarDeclP var);
 
 
@@ -160,6 +160,7 @@ TreeP makeBlock(VarDeclP decl, TreeP instr);
 MethodP fillMeth(MethodP meth, TreeP bloc, bool over);
 ClassP makeClass(TeteP tete, char* super, TreeP bloc);
 TeteP makeTete(char* nom, VarDeclP var);
+void attribSuper(ClassP list);
 
 void printClass(ClassP list);
 
@@ -167,7 +168,9 @@ void makeProg(ClassP listC, TreeP bloc);
 ClassP getClass(ClassP listC, char *name);
 
 //verifs
-bool circuitHeritage(ClassP list, ClassP listTemp);
-bool checkOverride(ClassP list, ClassP listTemp);
-bool checkSuper(ClassP class, MethodP method, ClassP list);
+bool circuitHeritage(ClassP list);
+bool pbOverride(ClassP list);
+bool checkSuper(ClassP class, MethodP method);
+bool isMethodInClass(MethodP method, ClassP class);
+bool areArgTypeTheSame(VarDeclP arg1, VarDeclP arg2);
 #endif
