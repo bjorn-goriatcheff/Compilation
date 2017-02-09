@@ -28,28 +28,11 @@ bool noEval = FALSE;
 
 FILE *out; /* fichier de sortie pour le code engendre */
 
-TreeP program;
-ClassP listClassPrgm;
 
 int main(int argc, char **argv)
 {
-        //Initialisation
-    listClassPrgm=NULL;
-
-        //Création des classes prédéfinies
-    ClassP Void = makeClass("Void", NULL,NULL,NULL,0,NULL);
-    ClassP Integer = makeClass("Integer", NULL, NULL, 0, NULL);
-    ClassP String = makeClass("String",NULL, NULL, NULL, 0,NULL);
-    String->next=Void;
-    Integer->next=String;
-    Void->next=NULL;
-    listClassPrgm=Integer;
-
-    MethodP toString = makeMeth("toString",NIL(Tree),NIL(VarDecl),String->name);
-    MethodP print = makeMeth("print", NIL(Tree), NIL(VarDecl), String->name);
-    toString->next=NULL;
-    print->next=NULL;
-
+	
+	
   int fi;
   int i, res;
 
@@ -140,6 +123,8 @@ TreeP makeTree(short op, int nbChildren, ...)
 }
 
 
+
+
 /* Retourne le rankieme fils d'un arbre (de 0 a n-1) */
 TreeP getChild(TreeP tree, int rank) {
   if (tree->nbChildren < rank -1) {
@@ -166,15 +151,12 @@ TreeP makeLeafStr(short op, char *str) {
   return tree;
 }
 
-
 /* Constructeur de feuille dont la valeur est un entier */
 TreeP makeLeafInt(short op, int val) {
   TreeP tree = makeNode(0, op) ;
   tree->u.val = val;
   return(tree);
 }
-
-
 /* Constructeur feuille dont la valeur est une variable */
 TreeP makeLeafLVar(short op, VarDeclP lvar) {
   TreeP tree = makeNode(0, op) ;
@@ -182,6 +164,84 @@ TreeP makeLeafLVar(short op, VarDeclP lvar) {
   return(tree);
 }
 
+/* Remplissage */
+VarDeclP makeVarDecl(char *name, char *type, TreeP expr) {
+	VarDeclP nouveau = NEW(1, VarDecl);
+	nouveau->name = name;
+	nouveau->varType = type;
+	nouveau->expr = expr;
+	nouveau->next = NIL(VarDecl);
+	return(nouveau);
+}
+
+TreeP makeBlock(VarDeclP var, TreeP inst)
+{
+	TreeP tree = makeNode(2, BLOCK);
+	tree->u.children[0] = makeLeafLVar(DECL, var);
+	tree->u.children[1] = inst;
+	return(tree);
+}
+
+MethodP makeMeth(char* name, VarDeclP args) {
+	MethodP nouv = NEW(1, Method);
+	nouv->name = name;
+	nouv->args = args;
+	return nouv; 
+}
+
+MethodP fillMeth(MethodP meth, TreeP bloc, bool over){
+	meth->type=bloc->u.children[0]->u.str;
+	meth->body=bloc->u.children[1];
+	meth->over=over;
+	return meth;
+}
+
+ClassP fillClass(ClassP class, char* super, TreeP bloc){
+	class->super = super;
+	MethodP tampon = makeMeth(class->name, class->var);
+	class->constructor = fillMeth(tampon, bloc, FALSE);
+	return class;
+}
+
+TeteP makeTete(char* nom, VarDeclP var)
+{
+    TeteP tete = NEW(1, Tete);
+    tete->type = nom;
+    tete->var = var;
+    return(tete);
+}
+
+ClassP makeClass(TeteP tete, char* super, TreeP bloc){
+	ClassP classe = NEW(1, Class);
+	classe->name=tete->type;
+	classe->constructor = NEW(1, Method);
+	classe->constructor->name=tete->type;
+	classe->constructor->body=bloc;
+	classe->constructor->args=tete->var;
+	classe->super=super; // nom de la classe et pas la structure
+	classe->next=NIL(Class);
+	return(classe);
+}
+
+void makeProg(ClassP listC, TreeP bloc) {
+	attribSuper(listC);
+	//VERIFICATIONS CONTEXTUELLES
+	if(circuitHeritage(listC)) setError(CONTEXT_ERROR); // verif circuit d'heritage
+	if(pbOverride(listC)) setError(CONTEXT_ERROR); // verif des overrides
+	
+	if(errorCode != NO_ERROR) printf("\nVerifications contextuelles echouees !\n");
+	else printf("\nVerifications contextuelles reussies !\n");
+	// CODE GENERATION
+}
+
+void attribSuper(ClassP list) { //complete le champ superC avec la classe correspondante au champ super
+	ClassP temp = list;
+	
+	while(temp != NULL) {
+	temp->superC = getClass(list, temp->super);
+	temp = temp->next;
+	}
+}
 
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
  * l'environnement la valeur des variables referencee
@@ -271,246 +331,212 @@ int getValue(TreeP tree, VarDeclP decls) {
 	 */
 	return -1;
 	}
-}
+}	
 
-                                        //NOUVEAU
-
-/* Remplissage AST*/
-VarDeclP makeVarDecl(char *name, char *type, TreeP expr) {
-	VarDeclP nouveau = NEW(1, VarDecl);
-	nouveau->name = name;
-	nouveau->varType = type;
-	nouveau->expr = expr;
-	nouveau->next = NIL(VarDecl);
-	return(nouveau);
-}
-
-TreeP makeBlock(VarDeclP var, TreeP inst)
-{
-	TreeP tree = makeNode(2, BLOCK);
-	tree->u.children[0] = makeLeafLVar(DECL, var);
-	tree->u.children[1] = inst;
-	return(tree);
-}
-
-MethodP makeMeth(char* name, TreeP bod,  VarDeclP args, char* typret) {
-	MethodP nouv = NEW(1, Method);
-	nouv->name=name;
-	nouv->
-	return nouv;
-}
-
-ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, bool inh, char* sup ){
-	ClassP classe = NEW(1, Class);
-    classe->name=name;
-    classe->var=var;
-    classe->method=meth;
-    classe->constructor=cons;
-    classe->inherited=inh;
-    classe->super=sup;
-    classe->next=NULL;
-	return(classe);
-}
-
-/*Vérifications Contextuelles*/
-// bool areClassTheSame(ClassP c1, ClassP c2)
-// {
-    // if(c1==NULL || c2==NULL)
-        // { abort(); }
-    // else if(strcmp(c1->name,c2->name)==0 && areVarTheSame(c1->var,c2->var) && areMethodsTheSame(c1->method , c2->method) && c1->isInherited ==
-    // c2->isInherited  && strcmp(c1->super,c2->super) && areMethodsTheSame(c1->constructor,c2->constructor))
-        // { return TRUE; }
-    // return FALSE;
-// }
-
-bool areMethodsTheSame(MethodP ma, MethodP mb)
-{
-    if(ma==NULL && mb==NULL)
-        { return TRUE; }
-	if( ma==NULL || mb==NULL )
-		{ return FALSE; }
-    if(strcmp(ma->name,mb->name)==0 && areVarTheSame(ma->args,mb->args) && strcmp(ma->type,mb->type)==0    )
-        {   return areMethodsTheSame(ma->next,mb->next) ;}
-    return FALSE;
-}
-
-bool areVarTheSame(VarDeclP va, VarDeclP vb)
-{
-	if( va==NULL && vb==NULL)
-		{return TRUE;}
-	if( va==NULL || vb==NULL)
-		{ return FALSE;}
-    if(strcmp(va->name,vb->name)==0 && strcmp(va->varType,vb->varType)==0 && va->expr==vb->expr   )
-        {return areVarTheSame(va->next,vb->next);}
-    return FALSE;
-}
-
-bool doesClassExist(ClassP lClass, char* cName)
-{
-    if(lClass==NULL || cName==NULL)
-        { abort(); }
-    ClassP temp = lClass;
-    while ( temp!=NULL )
-    {
-        if( strcmp(temp->name, cName)==0 )
-            { return TRUE; }
-        temp=temp->next;
-    }
-    return FALSE;
-}
-
-/** Renvoie TRUE si la méthode appartient à une classe ou sa classe mère, FALSE sinon
- *      met : la methode recherchee
- *      cl : la classe où on cherche la methode
- *      lClass : liste des classes du prgm
-**/
-bool isMethodInClass(MethodP met, ClassP cl, ClassP lClass)
-{
-    if(met==NULL)
-        { abort(); }
-	MethodP temp;
-	temp = cl->method;
-	/* on cherche dans la classe donnée */
-	while(temp != NULL)
-	{
-		if(areMethodsTheSame(temp,met))
-            { return TRUE; }
-		temp=temp->next;
-	}
-	/* Si on ne l'a pas trouvée, on cherche dans la classe super */
-	if (c->isInherited==FALSE;)
-    {
-        return FALSE;
-    }
-	return isMethodInClass(met, getClass(lClass, cl->super), lClass );
-}
-
-
-bool isArgInMethod(VarDeclP v, MethodP m)
-{
-    if(v==NULL || m==NULL)
-        {abort();}
-    VarDeclP temp=m->args;
-    while(temp!=NULL)
-    {
-        if(areVarTheSame(temp,v))
-            {return TRUE;}
-        temp=temp->next;
-    }
-    return FALSE;
-}
-
-bool isVarInClass(VarDeclP v, ClassP c, ClassP lClass)
-{
-    if(v==NULL || c==NULL || lClass == NULL)
-        { abort(); }
-    VarDeclP temp=c->var;
-    while(temp!=NULL)
-    {
-        if(areVarTheSame(temp,v))
-            {return TRUE;}
-        temp=temp->next;
-    }
-    return FALSE;
-}
-
-
-/* Renvoie TRUE si toutes les var de la super sont dans la classe et si la super et bien construite
- *  FALSE sinon
- *      listclass : list des classes dispo
- *      c : classe à vérifier
+/* tree : l'ast d'une expression 
+ * d : liste des variables déjà déclarées avec une valeur
 */
-//bool checkHeritage(ClassP listClass, ClassP c)
-//{ /* la classe super est bonne + les var de la super sont dans la classe fille*/
-//        ClassP sup= getClass(listClass,c->super);
-//        VarDeclP tempM = sup->var;
-//        VarDeclP tempF=c->var;
-//        while(tempM != NULL){
-//            if(tempF==NULL)
-//                {return FALSE;}
-//            else if(areVarTheSame(tempM,tempF)==FALSE)
-//                {tempF=tempF->next;}
-//            else if(areVarTheSame(tempM,tempF)==TRUE)
-//            {   tempM = tempM->next;
-//                tempF = c->var;
-//            }
-//            else /* on devrait obligatoirement passer dans l'un des if d'en haut */
-//                {abort();}
-//        }
-//        return checkClass(listClass, sup )==TRUE;
-//}
+/*void printTree(TreeP tree, int compteur)
+{
+	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
+	printf("\nprofondeur: %d\n ", compteur);
+	compteur++;
+	switch (tree->op)
+	{
+		
+		case IDVAR: 
+			printf("IDVAR: %s ", tree->u.str);
+
+			break;
+		case Id:
+			printf("Id: %s ", tree->u.str);
+
+			break;
+		case Cste : 
+			printf("Cste: %d ", tree->u.val);
+
+			break;
+		case EQ: 
+			printf("\nEQ: ");
+			printTree(getChild(tree,0),compteur);
+			printf("  ,  ");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		case NE: 
+			printf("\nNE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		case LT : 
+			printf("\nLT: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case LE: 
+			printf("\nLE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case GT:
+			printf("\nGT: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case GE :
+			printf("\nGE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case ITE : 
+			printf("\nITE: ");
+
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+			printf("\t");
+
+			printTree(getChild(tree,2),compteur);
+		
+			break;
+		case EADD: case EMINUS:  case EMULT : case EDIV : 
+			printf("\nADD/MIN/MULT/DIV: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		default:
+			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
+			exit(UNEXPECTED);
+	}
+}*/
+
+/** 
+ * program : programme à vérifier
+ * ClassInProg : liste de toutes les classes déclarées dans le programme
+**/
+bool checkProgram (TreeP program, ClassP ClassInProg)
+{
+	if(program==NULL)
+		return FALSE;
+	bool classChecked = FALSE; /*la liste des classe est OK ou aps OK*/
+	bool blocChecked = FALSE; /*les blocs sont OK ou pas */
+	ClassP cTemp=NULL;
+	
+	//On commence par checker la liste des classes du programme
+	if(ClassInProg==NULL) /* Pas de classes à vérifier */
+		classChecked = TRUE;
+	else	
+		cTemp=ClassInProg;
+	
+	if(classChecked==FALSE)
+		while(cTemp!=NULL)
+		{					/* refaire checkClass */
+			classChecked = classChecked && checkClass(cTemp) ;
+			cTemp=cTemp->next;
+		}
+		
+	/* Accès au bloc principal. Pas sûre que se soit le child 0  */
+	TreeP actualBloc=getChild(program,0);
+	//On check les blocs
+	if(getChild(actualBloc,0)!=NULL) /* On a des declarations de var*/
+		blocChecked = checkBloc(actualBloc, getChild(actualBloc,0)->u.lvar);
+	else /* On n'a pas de déclaration de variables */
+		blocChecked = checkBloc(actualBloc, NULL);
+	
+	//si les deux sont OK, le prog est OK
+	return classChecked && blocChecked;
+}
+	
+bool checkBloc(TreeP bloc, VarDeclP listDec)
+{
+	if (bloc == NULL) /* Rien à checker*/
+		return TRUE;
+		
+	switch (bloc->op) 
+		case AFFEC: /* Si c'est une affectation on vérifier le typage */
+			char *typeVar = getType(getChild(bloc,0)); // A FAIRE
+			char* typeVal = getType(getChild(bloc,1));
+			if(strcmp(typeVar,typeVal)==0)
+				return TRUE;
+			return FALSE;
+			break;
+	
+		case ISBLOCK : /* Si c'est un block */
+			if(listDec != NULL && getChild(bloc,1)==NULL ) /* On a la liste des déclarations mais pas d'instructions */
+				return FALSE;
+			/* On va verifier la liste de declaration*/
+			if( checkDecl(getChild(bloc,0), listDec)==FALSE )
+				return FALSE;
+			/* On verifie les instructions */
+			return checkInst(getChild(bloc,1) , listDec); // A FAIRE 
+			break;		
+}
+
+bool checkDecl(TreeP bloc, VarDeclP listDec)
+{
+	VarDeclP temp= listDec;
+	
+	while (temp != NULL)
+		if(temp->varType==NULL) /*Pas de type*/
+			return FALSE;
+		if(temp->expr==NULL) /* Pas d'expr */
+			return FALSE;
+		char* exprType = getType( getChild(temp->expr,0));
+		if(strcmp(temp->varType,exprType)!=0) /*Problème de typage*/
+			return FALSE;
+		temp=temp->next;
+	return TRUE;
+}
 
 bool checkClass(ClassP listClass, ClassP c)
-{
+{	/* Le nom est ok, la liste des Var est ok, les methodes+const sont ok et la classe mere est ok si elle existe */
     bool nomOk,varOk,metOk, consOk, herOk;
     if( c->name!=NULL && c->name[0] >= 'A' && c->name[0] <= 'Z' )
         { nomOk=TRUE; }
 
-    metOk=checkMethods(c);
-    consOk=checkMethod(c->constructor);
-    varOk=checkVar(c->var);
+    metOk=checkListMethod(c); //A FAIRE
+    consOk=checkAMethod(c->constructor); // A FAIRE
+    varOk=checkAttribut(c->var);  // A FAIRE
 
     if(c->super==NULL)
         { herOk=TRUE;}
     else
-        { //herOk=checkHeritage(listClass, c);
-            herOk=checkClass(listClass, getClass(listClass, c->super) );
-        }
+		herOk=checkHeritage(listClass, c, getClass(listClass, c->super) );
     if(nomOk && metOk && varOk && herOk && consOk)
         { return TRUE;}
     return FALSE;
 }
 
-bool checkMethods(ClassP c)
+bool checkHeritage(ClassP listClass, ClassP actualClass, ClassP super)
 {
-    if(c==NULL)
-        {abort();}
-    MethodP temp = c->method;
-    while(temp!=NULL)
-    {
-        if( checkMethod(temp)==FALSE )
-            {return FALSE;}
-        temp=temp->next;
-    }
-    return TRUE;
+		/* on vérifie que la classe mere existe bien */
+		if(checkClass(listClass,super)==FALSE )
+			return FALSE;
+		/* On vérifie qu'elle a bien été déclarée avant actualClass */
+		classP temp = listClass;
+		while(temp!=NULL)
+			if(strcmp(temp->name,super->name)==0) /*On trouve la super avant actualClass*/
+				return TRUE,
+			if(strcmp(temp->name,actualClass->name)==0) /*On troue actualClass avant sa super*/
+				return FALSE;
+			temp=temp->next;
+		/* On a rien trouvé : problème */
+		abort();
+		return FALSE;
 }
-
-bool checkMethod(MethodP m)
-{
-    // nom ok, args ok, body ok, type ok  ????????????????????check next????????
-    return FALSE;
-}
-
-bool checkVar(VarDeclP v)
-{
-    //name ok, type ok, expr ok, ?????????????????????check next ????????????
-    return FALSE;
-}
-
-//Autre
-ClassP getClass(ClassP listC, char *name)
-{
-    if(listC==NULL || name==NULL)
-        {abort();} /* Ne devrait pas se produire si doesClassExist() a bien été appelée avant*/
-    ClassP temp=listC;
-    while(temp!=NULL)
-    {
-        if(strcmp(name,temp->name)==0)
-            { return temp; }
-        temp=temp->next;
-    }
-    return NULL;
-}
-
-MethodP getMethod(MethodP m, ClassP c)
-{
-    if(m==NULL || c==NULL)
-        { abort(); }
-    MethodP temp=c->method;
-    while(temp!=NULL)
-    {
-        if(areMethodsTheSame(temp,m)==TRUE)
-            {return temp;}
-    }
-    return NULL;
+ 
+bool checkAttribut(c->var)
+{ //Vérifier qu'un attribut existe et n'est pas présent 2 fois dans la liste
 }
