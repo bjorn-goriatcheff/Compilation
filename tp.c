@@ -229,6 +229,7 @@ void makeProg(ClassP listC, TreeP bloc) {
 	if(circuitHeritage(listC)) setError(CONTEXT_ERROR); // verif circuit d'heritage
 	if(pbOverride(listC)) setError(CONTEXT_ERROR); // verif des overrides
 	
+	
 	if(errorCode != NO_ERROR) printf("\nVerifications contextuelles echouees !\n");
 	else printf("\nVerifications contextuelles reussies !\n");
 	// CODE GENERATION

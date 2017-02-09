@@ -1,0 +1,1888 @@
+Terminaux inutilisés dans la grammaire
+
+   CLASSDEF
+
+
+Grammaire
+
+    0 $accept: Prog $end
+
+    1 Prog: classLOpt block
+
+    2 classLOpt: %empty
+    3          | classDecl classLOpt
+
+    4 classDecl: classHeader IS '{' declListOpt methListOpt '}'
+
+    5 classHeader: CLASS construct extOpt initBlockOpt
+
+    6 extOpt: %empty
+    7       | EXTENDS TYPE '(' paramListOpt ')'
+
+    8 block: '{' instListOpt '}'
+    9      | '{' declList IS instList '}'
+
+   10 instList: inst instListOpt
+
+   11 instListOpt: %empty
+   12            | instList
+
+   13 inst: expression ';'
+   14     | block
+   15     | RETURN ';'
+   16     | affInst
+   17     | IF expression THEN inst ELSE inst
+
+   18 declList: decl declListOpt
+
+   19 declListOpt: %empty
+   20            | decl declListOpt
+
+   21 decl: VAR Id ':' TYPE initInstOpt ';'
+
+   22 methListOpt: %empty
+   23            | meth methListOpt
+
+   24 meth: overOpt methHeader isBlock
+   25     | overOpt methHeader isNotBlock
+
+   26 overOpt: %empty
+   27        | OVERRIDE
+
+   28 isNotBlock: ':' TYPE AFF expression
+
+   29 isBlock: typeOpt IS block
+
+   30 typeOpt: %empty
+   31        | ':' TYPE
+
+   32 methHeader: DEF Id '(' argListOpt ')'
+
+   33 initInstOpt: %empty
+   34            | AFF expression
+
+   35 initBlockOpt: %empty
+   36             | block
+
+   37 affInst: expression AFF expression ';'
+
+   38 expression: Id
+   39           | Cste
+   40           | STRING
+   41           | opexpr
+   42           | expression AND expression
+   43           | '(' expression ')'
+   44           | bexpr
+   45           | ADD expression
+   46           | SUB expression
+   47           | select
+   48           | cast
+   49           | instanc
+   50           | message
+
+   51 message: expression DOT Id '(' paramListOpt ')'
+
+   52 instanc: NEWW TYPE '(' paramListOpt ')'
+
+   53 paramListOpt: %empty
+   54             | paramList
+
+   55 paramList: expression
+   56          | expression ',' paramList
+
+   57 cast: '(' AS TYPE ':' expression ')'
+
+   58 select: expression DOT Id
+
+   59 opexpr: expression ADD expression
+   60       | expression SUB expression
+   61       | expression MUL expression
+   62       | expression DV expression
+
+   63 bexpr: expression RelOp expression
+
+   64 construct: TYPE '(' argListOpt ')'
+
+   65 argListOpt: %empty
+   66           | argList
+
+   67 argList: arg
+   68        | arg ',' argList
+
+   69 arg: Id ':' TYPE
+
+
+Terminaux, suivis des règles où ils apparaissent
+
+$end (0) 0
+'(' (40) 7 32 43 51 52 57 64
+')' (41) 7 32 43 51 52 57 64
+',' (44) 56 68
+':' (58) 21 28 31 57 69
+';' (59) 13 15 21 37
+'{' (123) 4 8 9
+'}' (125) 4 8 9
+error (256)
+IS (258) 4 9 29
+VAR (259) 21
+CLASS (260) 5
+AFF (261) 28 34 37
+DEF (262) 32
+ADD (263) 45 59
+SUB (264) 46 60
+MUL (265) 61
+DV (266) 62
+UNARY (267)
+AS (268) 57
+IF (269) 17
+THEN (270) 17
+ELSE (271) 17
+NEWW (272) 52
+DOT (273) 51 58
+EXTENDS (274) 7
+OVERRIDE (275) 27
+AND (276) 42
+Id (277) 21 32 38 51 58 69
+STRING (278) 40
+TYPE (279) 7 21 28 31 52 57 64 69
+RETURN (280) 15
+CLASSDEF (281)
+Cste (282) 39
+RelOp (283) 63
+
+
+Non-terminaux, suivis des règles où ils apparaissent
+
+$accept (36)
+    à gauche: 0
+Prog (37)
+    à gauche: 1, à droite: 0
+classLOpt (38)
+    à gauche: 2 3, à droite: 1 3
+classDecl (39)
+    à gauche: 4, à droite: 3
+classHeader (40)
+    à gauche: 5, à droite: 4
+extOpt (41)
+    à gauche: 6 7, à droite: 5
+block (42)
+    à gauche: 8 9, à droite: 1 14 29 36
+instList (43)
+    à gauche: 10, à droite: 9 12
+instListOpt (44)
+    à gauche: 11 12, à droite: 8 10
+inst (45)
+    à gauche: 13 14 15 16 17, à droite: 10 17
+declList (46)
+    à gauche: 18, à droite: 9
+declListOpt (47)
+    à gauche: 19 20, à droite: 4 18 20
+decl (48)
+    à gauche: 21, à droite: 18 20
+methListOpt (49)
+    à gauche: 22 23, à droite: 4 23
+meth (50)
+    à gauche: 24 25, à droite: 23
+overOpt (51)
+    à gauche: 26 27, à droite: 24 25
+isNotBlock (52)
+    à gauche: 28, à droite: 25
+isBlock (53)
+    à gauche: 29, à droite: 24
+typeOpt (54)
+    à gauche: 30 31, à droite: 29
+methHeader (55)
+    à gauche: 32, à droite: 24 25
+initInstOpt (56)
+    à gauche: 33 34, à droite: 21
+initBlockOpt (57)
+    à gauche: 35 36, à droite: 5
+affInst (58)
+    à gauche: 37, à droite: 16
+expression (59)
+    à gauche: 38 39 40 41 42 43 44 45 46 47 48 49 50, à droite: 13
+    17 28 34 37 42 43 45 46 51 55 56 57 58 59 60 61 62 63
+message (60)
+    à gauche: 51, à droite: 50
+instanc (61)
+    à gauche: 52, à droite: 49
+paramListOpt (62)
+    à gauche: 53 54, à droite: 7 51 52
+paramList (63)
+    à gauche: 55 56, à droite: 54 56
+cast (64)
+    à gauche: 57, à droite: 48
+select (65)
+    à gauche: 58, à droite: 47
+opexpr (66)
+    à gauche: 59 60 61 62, à droite: 41
+bexpr (67)
+    à gauche: 63, à droite: 44
+construct (68)
+    à gauche: 64, à droite: 5
+argListOpt (69)
+    à gauche: 65 66, à droite: 32 64
+argList (70)
+    à gauche: 67 68, à droite: 66 68
+arg (71)
+    à gauche: 69, à droite: 67 68
+
+
+État 0
+
+    0 $accept: . Prog $end
+
+    CLASS  décalage et aller à l'état 1
+
+    $défaut  réduction par utilisation de la règle 2 (classLOpt)
+
+    Prog         aller à l'état 2
+    classLOpt    aller à l'état 3
+    classDecl    aller à l'état 4
+    classHeader  aller à l'état 5
+
+
+État 1
+
+    5 classHeader: CLASS . construct extOpt initBlockOpt
+
+    TYPE  décalage et aller à l'état 6
+
+    construct  aller à l'état 7
+
+
+État 2
+
+    0 $accept: Prog . $end
+
+    $end  décalage et aller à l'état 8
+
+
+État 3
+
+    1 Prog: classLOpt . block
+
+    '{'  décalage et aller à l'état 9
+
+    block  aller à l'état 10
+
+
+État 4
+
+    3 classLOpt: classDecl . classLOpt
+
+    CLASS  décalage et aller à l'état 1
+
+    $défaut  réduction par utilisation de la règle 2 (classLOpt)
+
+    classLOpt    aller à l'état 11
+    classDecl    aller à l'état 4
+    classHeader  aller à l'état 5
+
+
+État 5
+
+    4 classDecl: classHeader . IS '{' declListOpt methListOpt '}'
+
+    IS  décalage et aller à l'état 12
+
+
+État 6
+
+   64 construct: TYPE . '(' argListOpt ')'
+
+    '('  décalage et aller à l'état 13
+
+
+État 7
+
+    5 classHeader: CLASS construct . extOpt initBlockOpt
+
+    EXTENDS  décalage et aller à l'état 14
+
+    $défaut  réduction par utilisation de la règle 6 (extOpt)
+
+    extOpt  aller à l'état 15
+
+
+État 8
+
+    0 $accept: Prog $end .
+
+    $défaut  accepter
+
+
+État 9
+
+    8 block: '{' . instListOpt '}'
+    9      | '{' . declList IS instList '}'
+
+    VAR     décalage et aller à l'état 16
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    IF      décalage et aller à l'état 19
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    RETURN  décalage et aller à l'état 23
+    Cste    décalage et aller à l'état 24
+    '{'     décalage et aller à l'état 9
+    '('     décalage et aller à l'état 25
+
+    $défaut  réduction par utilisation de la règle 11 (instListOpt)
+
+    block        aller à l'état 26
+    instList     aller à l'état 27
+    instListOpt  aller à l'état 28
+    inst         aller à l'état 29
+    declList     aller à l'état 30
+    decl         aller à l'état 31
+    affInst      aller à l'état 32
+    expression   aller à l'état 33
+    message      aller à l'état 34
+    instanc      aller à l'état 35
+    cast         aller à l'état 36
+    select       aller à l'état 37
+    opexpr       aller à l'état 38
+    bexpr        aller à l'état 39
+
+
+État 10
+
+    1 Prog: classLOpt block .
+
+    $défaut  réduction par utilisation de la règle 1 (Prog)
+
+
+État 11
+
+    3 classLOpt: classDecl classLOpt .
+
+    $défaut  réduction par utilisation de la règle 3 (classLOpt)
+
+
+État 12
+
+    4 classDecl: classHeader IS . '{' declListOpt methListOpt '}'
+
+    '{'  décalage et aller à l'état 40
+
+
+État 13
+
+   64 construct: TYPE '(' . argListOpt ')'
+
+    Id  décalage et aller à l'état 41
+
+    $défaut  réduction par utilisation de la règle 65 (argListOpt)
+
+    argListOpt  aller à l'état 42
+    argList     aller à l'état 43
+    arg         aller à l'état 44
+
+
+État 14
+
+    7 extOpt: EXTENDS . TYPE '(' paramListOpt ')'
+
+    TYPE  décalage et aller à l'état 45
+
+
+État 15
+
+    5 classHeader: CLASS construct extOpt . initBlockOpt
+
+    '{'  décalage et aller à l'état 9
+
+    $défaut  réduction par utilisation de la règle 35 (initBlockOpt)
+
+    block         aller à l'état 46
+    initBlockOpt  aller à l'état 47
+
+
+État 16
+
+   21 decl: VAR . Id ':' TYPE initInstOpt ';'
+
+    Id  décalage et aller à l'état 48
+
+
+État 17
+
+   45 expression: ADD . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 49
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 18
+
+   46 expression: SUB . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 50
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 19
+
+   17 inst: IF . expression THEN inst ELSE inst
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 51
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 20
+
+   52 instanc: NEWW . TYPE '(' paramListOpt ')'
+
+    TYPE  décalage et aller à l'état 52
+
+
+État 21
+
+   38 expression: Id .
+
+    $défaut  réduction par utilisation de la règle 38 (expression)
+
+
+État 22
+
+   40 expression: STRING .
+
+    $défaut  réduction par utilisation de la règle 40 (expression)
+
+
+État 23
+
+   15 inst: RETURN . ';'
+
+    ';'  décalage et aller à l'état 53
+
+
+État 24
+
+   39 expression: Cste .
+
+    $défaut  réduction par utilisation de la règle 39 (expression)
+
+
+État 25
+
+   43 expression: '(' . expression ')'
+   57 cast: '(' . AS TYPE ':' expression ')'
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    AS      décalage et aller à l'état 54
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 55
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 26
+
+   14 inst: block .
+
+    $défaut  réduction par utilisation de la règle 14 (inst)
+
+
+État 27
+
+   12 instListOpt: instList .
+
+    $défaut  réduction par utilisation de la règle 12 (instListOpt)
+
+
+État 28
+
+    8 block: '{' instListOpt . '}'
+
+    '}'  décalage et aller à l'état 56
+
+
+État 29
+
+   10 instList: inst . instListOpt
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    IF      décalage et aller à l'état 19
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    RETURN  décalage et aller à l'état 23
+    Cste    décalage et aller à l'état 24
+    '{'     décalage et aller à l'état 9
+    '('     décalage et aller à l'état 25
+
+    $défaut  réduction par utilisation de la règle 11 (instListOpt)
+
+    block        aller à l'état 26
+    instList     aller à l'état 27
+    instListOpt  aller à l'état 57
+    inst         aller à l'état 29
+    affInst      aller à l'état 32
+    expression   aller à l'état 33
+    message      aller à l'état 34
+    instanc      aller à l'état 35
+    cast         aller à l'état 36
+    select       aller à l'état 37
+    opexpr       aller à l'état 38
+    bexpr        aller à l'état 39
+
+
+État 30
+
+    9 block: '{' declList . IS instList '}'
+
+    IS  décalage et aller à l'état 58
+
+
+État 31
+
+   18 declList: decl . declListOpt
+
+    VAR  décalage et aller à l'état 16
+
+    $défaut  réduction par utilisation de la règle 19 (declListOpt)
+
+    declListOpt  aller à l'état 59
+    decl         aller à l'état 60
+
+
+État 32
+
+   16 inst: affInst .
+
+    $défaut  réduction par utilisation de la règle 16 (inst)
+
+
+État 33
+
+   13 inst: expression . ';'
+   37 affInst: expression . AFF expression ';'
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    AFF    décalage et aller à l'état 61
+    ADD    décalage et aller à l'état 62
+    SUB    décalage et aller à l'état 63
+    MUL    décalage et aller à l'état 64
+    DV     décalage et aller à l'état 65
+    DOT    décalage et aller à l'état 66
+    AND    décalage et aller à l'état 67
+    RelOp  décalage et aller à l'état 68
+    ';'    décalage et aller à l'état 69
+
+
+État 34
+
+   50 expression: message .
+
+    $défaut  réduction par utilisation de la règle 50 (expression)
+
+
+État 35
+
+   49 expression: instanc .
+
+    $défaut  réduction par utilisation de la règle 49 (expression)
+
+
+État 36
+
+   48 expression: cast .
+
+    $défaut  réduction par utilisation de la règle 48 (expression)
+
+
+État 37
+
+   47 expression: select .
+
+    $défaut  réduction par utilisation de la règle 47 (expression)
+
+
+État 38
+
+   41 expression: opexpr .
+
+    $défaut  réduction par utilisation de la règle 41 (expression)
+
+
+État 39
+
+   44 expression: bexpr .
+
+    $défaut  réduction par utilisation de la règle 44 (expression)
+
+
+État 40
+
+    4 classDecl: classHeader IS '{' . declListOpt methListOpt '}'
+
+    VAR  décalage et aller à l'état 16
+
+    $défaut  réduction par utilisation de la règle 19 (declListOpt)
+
+    declListOpt  aller à l'état 70
+    decl         aller à l'état 60
+
+
+État 41
+
+   69 arg: Id . ':' TYPE
+
+    ':'  décalage et aller à l'état 71
+
+
+État 42
+
+   64 construct: TYPE '(' argListOpt . ')'
+
+    ')'  décalage et aller à l'état 72
+
+
+État 43
+
+   66 argListOpt: argList .
+
+    $défaut  réduction par utilisation de la règle 66 (argListOpt)
+
+
+État 44
+
+   67 argList: arg .
+   68        | arg . ',' argList
+
+    ','  décalage et aller à l'état 73
+
+    $défaut  réduction par utilisation de la règle 67 (argList)
+
+
+État 45
+
+    7 extOpt: EXTENDS TYPE . '(' paramListOpt ')'
+
+    '('  décalage et aller à l'état 74
+
+
+État 46
+
+   36 initBlockOpt: block .
+
+    $défaut  réduction par utilisation de la règle 36 (initBlockOpt)
+
+
+État 47
+
+    5 classHeader: CLASS construct extOpt initBlockOpt .
+
+    $défaut  réduction par utilisation de la règle 5 (classHeader)
+
+
+État 48
+
+   21 decl: VAR Id . ':' TYPE initInstOpt ';'
+
+    ':'  décalage et aller à l'état 75
+
+
+État 49
+
+   42 expression: expression . AND expression
+   45           | ADD expression .
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    DOT  décalage et aller à l'état 66
+    AND  décalage et aller à l'état 67
+
+    $défaut  réduction par utilisation de la règle 45 (expression)
+
+
+État 50
+
+   42 expression: expression . AND expression
+   46           | SUB expression .
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    DOT  décalage et aller à l'état 66
+    AND  décalage et aller à l'état 67
+
+    $défaut  réduction par utilisation de la règle 46 (expression)
+
+
+État 51
+
+   17 inst: IF expression . THEN inst ELSE inst
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    ADD    décalage et aller à l'état 62
+    SUB    décalage et aller à l'état 63
+    MUL    décalage et aller à l'état 64
+    DV     décalage et aller à l'état 65
+    THEN   décalage et aller à l'état 76
+    DOT    décalage et aller à l'état 66
+    AND    décalage et aller à l'état 67
+    RelOp  décalage et aller à l'état 68
+
+
+État 52
+
+   52 instanc: NEWW TYPE . '(' paramListOpt ')'
+
+    '('  décalage et aller à l'état 77
+
+
+État 53
+
+   15 inst: RETURN ';' .
+
+    $défaut  réduction par utilisation de la règle 15 (inst)
+
+
+État 54
+
+   57 cast: '(' AS . TYPE ':' expression ')'
+
+    TYPE  décalage et aller à l'état 78
+
+
+État 55
+
+   42 expression: expression . AND expression
+   43           | '(' expression . ')'
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    ADD    décalage et aller à l'état 62
+    SUB    décalage et aller à l'état 63
+    MUL    décalage et aller à l'état 64
+    DV     décalage et aller à l'état 65
+    DOT    décalage et aller à l'état 66
+    AND    décalage et aller à l'état 67
+    RelOp  décalage et aller à l'état 68
+    ')'    décalage et aller à l'état 79
+
+
+État 56
+
+    8 block: '{' instListOpt '}' .
+
+    $défaut  réduction par utilisation de la règle 8 (block)
+
+
+État 57
+
+   10 instList: inst instListOpt .
+
+    $défaut  réduction par utilisation de la règle 10 (instList)
+
+
+État 58
+
+    9 block: '{' declList IS . instList '}'
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    IF      décalage et aller à l'état 19
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    RETURN  décalage et aller à l'état 23
+    Cste    décalage et aller à l'état 24
+    '{'     décalage et aller à l'état 9
+    '('     décalage et aller à l'état 25
+
+    block       aller à l'état 26
+    instList    aller à l'état 80
+    inst        aller à l'état 29
+    affInst     aller à l'état 32
+    expression  aller à l'état 33
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 59
+
+   18 declList: decl declListOpt .
+
+    $défaut  réduction par utilisation de la règle 18 (declList)
+
+
+État 60
+
+   20 declListOpt: decl . declListOpt
+
+    VAR  décalage et aller à l'état 16
+
+    $défaut  réduction par utilisation de la règle 19 (declListOpt)
+
+    declListOpt  aller à l'état 81
+    decl         aller à l'état 60
+
+
+État 61
+
+   37 affInst: expression AFF . expression ';'
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 82
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 62
+
+   59 opexpr: expression ADD . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 83
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 63
+
+   60 opexpr: expression SUB . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 84
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 64
+
+   61 opexpr: expression MUL . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 85
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 65
+
+   62 opexpr: expression DV . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 86
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 66
+
+   51 message: expression DOT . Id '(' paramListOpt ')'
+   58 select: expression DOT . Id
+
+    Id  décalage et aller à l'état 87
+
+
+État 67
+
+   42 expression: expression AND . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 88
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 68
+
+   63 bexpr: expression RelOp . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 89
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 69
+
+   13 inst: expression ';' .
+
+    $défaut  réduction par utilisation de la règle 13 (inst)
+
+
+État 70
+
+    4 classDecl: classHeader IS '{' declListOpt . methListOpt '}'
+
+    OVERRIDE  décalage et aller à l'état 90
+
+    DEF       réduction par utilisation de la règle 26 (overOpt)
+    $défaut  réduction par utilisation de la règle 22 (methListOpt)
+
+    methListOpt  aller à l'état 91
+    meth         aller à l'état 92
+    overOpt      aller à l'état 93
+
+
+État 71
+
+   69 arg: Id ':' . TYPE
+
+    TYPE  décalage et aller à l'état 94
+
+
+État 72
+
+   64 construct: TYPE '(' argListOpt ')' .
+
+    $défaut  réduction par utilisation de la règle 64 (construct)
+
+
+État 73
+
+   68 argList: arg ',' . argList
+
+    Id  décalage et aller à l'état 41
+
+    argList  aller à l'état 95
+    arg      aller à l'état 44
+
+
+État 74
+
+    7 extOpt: EXTENDS TYPE '(' . paramListOpt ')'
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    $défaut  réduction par utilisation de la règle 53 (paramListOpt)
+
+    expression    aller à l'état 96
+    message       aller à l'état 34
+    instanc       aller à l'état 35
+    paramListOpt  aller à l'état 97
+    paramList     aller à l'état 98
+    cast          aller à l'état 36
+    select        aller à l'état 37
+    opexpr        aller à l'état 38
+    bexpr         aller à l'état 39
+
+
+État 75
+
+   21 decl: VAR Id ':' . TYPE initInstOpt ';'
+
+    TYPE  décalage et aller à l'état 99
+
+
+État 76
+
+   17 inst: IF expression THEN . inst ELSE inst
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    IF      décalage et aller à l'état 19
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    RETURN  décalage et aller à l'état 23
+    Cste    décalage et aller à l'état 24
+    '{'     décalage et aller à l'état 9
+    '('     décalage et aller à l'état 25
+
+    block       aller à l'état 26
+    inst        aller à l'état 100
+    affInst     aller à l'état 32
+    expression  aller à l'état 33
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 77
+
+   52 instanc: NEWW TYPE '(' . paramListOpt ')'
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    $défaut  réduction par utilisation de la règle 53 (paramListOpt)
+
+    expression    aller à l'état 96
+    message       aller à l'état 34
+    instanc       aller à l'état 35
+    paramListOpt  aller à l'état 101
+    paramList     aller à l'état 98
+    cast          aller à l'état 36
+    select        aller à l'état 37
+    opexpr        aller à l'état 38
+    bexpr         aller à l'état 39
+
+
+État 78
+
+   57 cast: '(' AS TYPE . ':' expression ')'
+
+    ':'  décalage et aller à l'état 102
+
+
+État 79
+
+   43 expression: '(' expression ')' .
+
+    $défaut  réduction par utilisation de la règle 43 (expression)
+
+
+État 80
+
+    9 block: '{' declList IS instList . '}'
+
+    '}'  décalage et aller à l'état 103
+
+
+État 81
+
+   20 declListOpt: decl declListOpt .
+
+    $défaut  réduction par utilisation de la règle 20 (declListOpt)
+
+
+État 82
+
+   37 affInst: expression AFF expression . ';'
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    ADD    décalage et aller à l'état 62
+    SUB    décalage et aller à l'état 63
+    MUL    décalage et aller à l'état 64
+    DV     décalage et aller à l'état 65
+    DOT    décalage et aller à l'état 66
+    AND    décalage et aller à l'état 67
+    RelOp  décalage et aller à l'état 68
+    ';'    décalage et aller à l'état 104
+
+
+État 83
+
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   59       | expression ADD expression .
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    MUL  décalage et aller à l'état 64
+    DV   décalage et aller à l'état 65
+    DOT  décalage et aller à l'état 66
+    AND  décalage et aller à l'état 67
+
+    $défaut  réduction par utilisation de la règle 59 (opexpr)
+
+
+État 84
+
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   60       | expression SUB expression .
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    MUL  décalage et aller à l'état 64
+    DV   décalage et aller à l'état 65
+    DOT  décalage et aller à l'état 66
+    AND  décalage et aller à l'état 67
+
+    $défaut  réduction par utilisation de la règle 60 (opexpr)
+
+
+État 85
+
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   61       | expression MUL expression .
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    DOT  décalage et aller à l'état 66
+    AND  décalage et aller à l'état 67
+
+    $défaut  réduction par utilisation de la règle 61 (opexpr)
+
+
+État 86
+
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   62       | expression DV expression .
+   63 bexpr: expression . RelOp expression
+
+    DOT  décalage et aller à l'état 66
+    AND  décalage et aller à l'état 67
+
+    $défaut  réduction par utilisation de la règle 62 (opexpr)
+
+
+État 87
+
+   51 message: expression DOT Id . '(' paramListOpt ')'
+   58 select: expression DOT Id .
+
+    '('  décalage et aller à l'état 105
+
+    $défaut  réduction par utilisation de la règle 58 (select)
+
+
+État 88
+
+   42 expression: expression . AND expression
+   42           | expression AND expression .
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    DOT  décalage et aller à l'état 66
+
+    $défaut  réduction par utilisation de la règle 42 (expression)
+
+
+État 89
+
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+   63      | expression RelOp expression .
+
+    ADD  décalage et aller à l'état 62
+    SUB  décalage et aller à l'état 63
+    MUL  décalage et aller à l'état 64
+    DV   décalage et aller à l'état 65
+    DOT  décalage et aller à l'état 66
+    AND  décalage et aller à l'état 67
+
+    RelOp  erreur (non-associative)
+
+    $défaut  réduction par utilisation de la règle 63 (bexpr)
+
+
+État 90
+
+   27 overOpt: OVERRIDE .
+
+    $défaut  réduction par utilisation de la règle 27 (overOpt)
+
+
+État 91
+
+    4 classDecl: classHeader IS '{' declListOpt methListOpt . '}'
+
+    '}'  décalage et aller à l'état 106
+
+
+État 92
+
+   23 methListOpt: meth . methListOpt
+
+    OVERRIDE  décalage et aller à l'état 90
+
+    DEF       réduction par utilisation de la règle 26 (overOpt)
+    $défaut  réduction par utilisation de la règle 22 (methListOpt)
+
+    methListOpt  aller à l'état 107
+    meth         aller à l'état 92
+    overOpt      aller à l'état 93
+
+
+État 93
+
+   24 meth: overOpt . methHeader isBlock
+   25     | overOpt . methHeader isNotBlock
+
+    DEF  décalage et aller à l'état 108
+
+    methHeader  aller à l'état 109
+
+
+État 94
+
+   69 arg: Id ':' TYPE .
+
+    $défaut  réduction par utilisation de la règle 69 (arg)
+
+
+État 95
+
+   68 argList: arg ',' argList .
+
+    $défaut  réduction par utilisation de la règle 68 (argList)
+
+
+État 96
+
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   55 paramList: expression .
+   56          | expression . ',' paramList
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    ADD    décalage et aller à l'état 62
+    SUB    décalage et aller à l'état 63
+    MUL    décalage et aller à l'état 64
+    DV     décalage et aller à l'état 65
+    DOT    décalage et aller à l'état 66
+    AND    décalage et aller à l'état 67
+    RelOp  décalage et aller à l'état 68
+    ','    décalage et aller à l'état 110
+
+    $défaut  réduction par utilisation de la règle 55 (paramList)
+
+
+État 97
+
+    7 extOpt: EXTENDS TYPE '(' paramListOpt . ')'
+
+    ')'  décalage et aller à l'état 111
+
+
+État 98
+
+   54 paramListOpt: paramList .
+
+    $défaut  réduction par utilisation de la règle 54 (paramListOpt)
+
+
+État 99
+
+   21 decl: VAR Id ':' TYPE . initInstOpt ';'
+
+    AFF  décalage et aller à l'état 112
+
+    $défaut  réduction par utilisation de la règle 33 (initInstOpt)
+
+    initInstOpt  aller à l'état 113
+
+
+État 100
+
+   17 inst: IF expression THEN inst . ELSE inst
+
+    ELSE  décalage et aller à l'état 114
+
+
+État 101
+
+   52 instanc: NEWW TYPE '(' paramListOpt . ')'
+
+    ')'  décalage et aller à l'état 115
+
+
+État 102
+
+   57 cast: '(' AS TYPE ':' . expression ')'
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 116
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 103
+
+    9 block: '{' declList IS instList '}' .
+
+    $défaut  réduction par utilisation de la règle 9 (block)
+
+
+État 104
+
+   37 affInst: expression AFF expression ';' .
+
+    $défaut  réduction par utilisation de la règle 37 (affInst)
+
+
+État 105
+
+   51 message: expression DOT Id '(' . paramListOpt ')'
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    $défaut  réduction par utilisation de la règle 53 (paramListOpt)
+
+    expression    aller à l'état 96
+    message       aller à l'état 34
+    instanc       aller à l'état 35
+    paramListOpt  aller à l'état 117
+    paramList     aller à l'état 98
+    cast          aller à l'état 36
+    select        aller à l'état 37
+    opexpr        aller à l'état 38
+    bexpr         aller à l'état 39
+
+
+État 106
+
+    4 classDecl: classHeader IS '{' declListOpt methListOpt '}' .
+
+    $défaut  réduction par utilisation de la règle 4 (classDecl)
+
+
+État 107
+
+   23 methListOpt: meth methListOpt .
+
+    $défaut  réduction par utilisation de la règle 23 (methListOpt)
+
+
+État 108
+
+   32 methHeader: DEF . Id '(' argListOpt ')'
+
+    Id  décalage et aller à l'état 118
+
+
+État 109
+
+   24 meth: overOpt methHeader . isBlock
+   25     | overOpt methHeader . isNotBlock
+
+    ':'  décalage et aller à l'état 119
+
+    $défaut  réduction par utilisation de la règle 30 (typeOpt)
+
+    isNotBlock  aller à l'état 120
+    isBlock     aller à l'état 121
+    typeOpt     aller à l'état 122
+
+
+État 110
+
+   56 paramList: expression ',' . paramList
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 96
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    paramList   aller à l'état 123
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 111
+
+    7 extOpt: EXTENDS TYPE '(' paramListOpt ')' .
+
+    $défaut  réduction par utilisation de la règle 7 (extOpt)
+
+
+État 112
+
+   34 initInstOpt: AFF . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 124
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 113
+
+   21 decl: VAR Id ':' TYPE initInstOpt . ';'
+
+    ';'  décalage et aller à l'état 125
+
+
+État 114
+
+   17 inst: IF expression THEN inst ELSE . inst
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    IF      décalage et aller à l'état 19
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    RETURN  décalage et aller à l'état 23
+    Cste    décalage et aller à l'état 24
+    '{'     décalage et aller à l'état 9
+    '('     décalage et aller à l'état 25
+
+    block       aller à l'état 26
+    inst        aller à l'état 126
+    affInst     aller à l'état 32
+    expression  aller à l'état 33
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 115
+
+   52 instanc: NEWW TYPE '(' paramListOpt ')' .
+
+    $défaut  réduction par utilisation de la règle 52 (instanc)
+
+
+État 116
+
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   57 cast: '(' AS TYPE ':' expression . ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    ADD    décalage et aller à l'état 62
+    SUB    décalage et aller à l'état 63
+    MUL    décalage et aller à l'état 64
+    DV     décalage et aller à l'état 65
+    DOT    décalage et aller à l'état 66
+    AND    décalage et aller à l'état 67
+    RelOp  décalage et aller à l'état 68
+    ')'    décalage et aller à l'état 127
+
+
+État 117
+
+   51 message: expression DOT Id '(' paramListOpt . ')'
+
+    ')'  décalage et aller à l'état 128
+
+
+État 118
+
+   32 methHeader: DEF Id . '(' argListOpt ')'
+
+    '('  décalage et aller à l'état 129
+
+
+État 119
+
+   28 isNotBlock: ':' . TYPE AFF expression
+   31 typeOpt: ':' . TYPE
+
+    TYPE  décalage et aller à l'état 130
+
+
+État 120
+
+   25 meth: overOpt methHeader isNotBlock .
+
+    $défaut  réduction par utilisation de la règle 25 (meth)
+
+
+État 121
+
+   24 meth: overOpt methHeader isBlock .
+
+    $défaut  réduction par utilisation de la règle 24 (meth)
+
+
+État 122
+
+   29 isBlock: typeOpt . IS block
+
+    IS  décalage et aller à l'état 131
+
+
+État 123
+
+   56 paramList: expression ',' paramList .
+
+    $défaut  réduction par utilisation de la règle 56 (paramList)
+
+
+État 124
+
+   34 initInstOpt: AFF expression .
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    ADD    décalage et aller à l'état 62
+    SUB    décalage et aller à l'état 63
+    MUL    décalage et aller à l'état 64
+    DV     décalage et aller à l'état 65
+    DOT    décalage et aller à l'état 66
+    AND    décalage et aller à l'état 67
+    RelOp  décalage et aller à l'état 68
+
+    $défaut  réduction par utilisation de la règle 34 (initInstOpt)
+
+
+État 125
+
+   21 decl: VAR Id ':' TYPE initInstOpt ';' .
+
+    $défaut  réduction par utilisation de la règle 21 (decl)
+
+
+État 126
+
+   17 inst: IF expression THEN inst ELSE inst .
+
+    $défaut  réduction par utilisation de la règle 17 (inst)
+
+
+État 127
+
+   57 cast: '(' AS TYPE ':' expression ')' .
+
+    $défaut  réduction par utilisation de la règle 57 (cast)
+
+
+État 128
+
+   51 message: expression DOT Id '(' paramListOpt ')' .
+
+    $défaut  réduction par utilisation de la règle 51 (message)
+
+
+État 129
+
+   32 methHeader: DEF Id '(' . argListOpt ')'
+
+    Id  décalage et aller à l'état 41
+
+    $défaut  réduction par utilisation de la règle 65 (argListOpt)
+
+    argListOpt  aller à l'état 132
+    argList     aller à l'état 43
+    arg         aller à l'état 44
+
+
+État 130
+
+   28 isNotBlock: ':' TYPE . AFF expression
+   31 typeOpt: ':' TYPE .
+
+    AFF  décalage et aller à l'état 133
+
+    $défaut  réduction par utilisation de la règle 31 (typeOpt)
+
+
+État 131
+
+   29 isBlock: typeOpt IS . block
+
+    '{'  décalage et aller à l'état 9
+
+    block  aller à l'état 134
+
+
+État 132
+
+   32 methHeader: DEF Id '(' argListOpt . ')'
+
+    ')'  décalage et aller à l'état 135
+
+
+État 133
+
+   28 isNotBlock: ':' TYPE AFF . expression
+
+    ADD     décalage et aller à l'état 17
+    SUB     décalage et aller à l'état 18
+    NEWW    décalage et aller à l'état 20
+    Id      décalage et aller à l'état 21
+    STRING  décalage et aller à l'état 22
+    Cste    décalage et aller à l'état 24
+    '('     décalage et aller à l'état 25
+
+    expression  aller à l'état 136
+    message     aller à l'état 34
+    instanc     aller à l'état 35
+    cast        aller à l'état 36
+    select      aller à l'état 37
+    opexpr      aller à l'état 38
+    bexpr       aller à l'état 39
+
+
+État 134
+
+   29 isBlock: typeOpt IS block .
+
+    $défaut  réduction par utilisation de la règle 29 (isBlock)
+
+
+État 135
+
+   32 methHeader: DEF Id '(' argListOpt ')' .
+
+    $défaut  réduction par utilisation de la règle 32 (methHeader)
+
+
+État 136
+
+   28 isNotBlock: ':' TYPE AFF expression .
+   42 expression: expression . AND expression
+   51 message: expression . DOT Id '(' paramListOpt ')'
+   58 select: expression . DOT Id
+   59 opexpr: expression . ADD expression
+   60       | expression . SUB expression
+   61       | expression . MUL expression
+   62       | expression . DV expression
+   63 bexpr: expression . RelOp expression
+
+    ADD    décalage et aller à l'état 62
+    SUB    décalage et aller à l'état 63
+    MUL    décalage et aller à l'état 64
+    DV     décalage et aller à l'état 65
+    DOT    décalage et aller à l'état 66
+    AND    décalage et aller à l'état 67
+    RelOp  décalage et aller à l'état 68
+
+    $défaut  réduction par utilisation de la règle 28 (isNotBlock)
