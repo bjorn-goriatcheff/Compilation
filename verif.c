@@ -30,7 +30,7 @@ bool pbOverride(ClassP list){ //retourne TRUE s'il y a un probleme
 			MethodP temp = list->method;
 			
 			while(temp != NULL) {
-				if(temp->over) {printf("\nPresence d'un override dans la classe %s qui n'a pas de super\n", list->name); return TRUE;}
+				if(temp->over) {printf("\nPresence d'un override dans la classe %s qui n'a pas de super\n", list->name); retour = TRUE;}
 				temp = temp->next;
 			}
 		}
@@ -39,7 +39,7 @@ bool pbOverride(ClassP list){ //retourne TRUE s'il y a un probleme
 			MethodP temp = list->method;
 			
 			while(temp != NULL) {
-				if(temp->over && !checkSuper(list->superC, temp)) {printf("\nAucune methode correspondant a %s dans le(s) super(s) de %s\n", temp->name, list->name); return TRUE;}
+				if(temp->over && !checkSuper(list->superC, temp)) {printf("\nAucune methode correspondant a %s dans le(s) super(s) de %s\n", temp->name, list->name); retour = TRUE;}
 				temp = temp->next;
 			}
 		}
@@ -51,14 +51,13 @@ bool pbOverride(ClassP list){ //retourne TRUE s'il y a un probleme
 }
 
 bool checkSuper(ClassP class, MethodP method) { //retourne TRUE si une methode correspondante a ete trouvee dans les supers
-	if(class->super != NULL) {
+	if(class != NULL) {
 		bool retour = checkSuper(class->superC, method);
 		
 		if(isMethodInClass(method, class)) return TRUE;
 		
 		else return retour;
 	}
-	
 	return FALSE;
 }
 
@@ -83,14 +82,13 @@ bool isMethodInClass(MethodP method, ClassP class) { //retourne TRUE si method d
 
 bool areArgTypeTheSame(VarDeclP arg1, VarDeclP arg2) { // retourn TRUE si tous les arguments on le meme type un a un
 	bool retour = TRUE;
-	//printf("%s\n", arg1->name);
-	/*while(arg1 != NULL && arg2 != NULL) {
+	while(arg1 != NULL && arg2 != NULL) {
 		if(arg1->varType != NULL && arg2->varType != NULL && strcmp(arg1->varType, arg2->varType) != 0) retour = FALSE;
 		arg1 = arg1->next;
 		arg2 = arg2->next;
 	}
 	
-	if(arg1 != NULL || arg2 != NULL) retour = FALSE;*/
+	if(arg1 != NULL || arg2 != NULL) retour = FALSE;
 	
 	return retour;
 }
