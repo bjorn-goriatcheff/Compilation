@@ -85,7 +85,7 @@ void lexError(char c) {
 %%
 {Entier} 	{ yylval.I = atoi(yytext); return(Cste); }
 {Symbole}	{ return(yytext[0]); }
-{Upper}{LC}*    { return TYPE;}
+{Upper}{LC}*    { yylval.S = strdup(yytext); return TYPE;}
 {Lower}{LC}*   { return keywordOrId(); }
 {Delim}      {}
 {Guill}{InterieurChaine}*{Guill} {return STRING;}
