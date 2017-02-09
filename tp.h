@@ -40,6 +40,8 @@ typedef unsigned char bool;
 #define INST 21
 #define PROG 22
 #define ISNOTBLOCK 23
+#define AFFEC 24
+
 
 
 /* Codes d'erreurs */
@@ -71,6 +73,12 @@ typedef struct _Method Method, *MethodP;
 struct _Class;
 typedef struct _Class Class, *ClassP;
 
+struct _TeteClass;
+typedef struct _TeteClass Tete, *TeteP;
+
+struct _Env;
+typedef struct _Env Env, *EnvP;
+
 /* la structure d'un arbre (noeud ou feuille) */
 struct _Tree {
   short op;         /* etiquette de l'operateur courant */
@@ -95,6 +103,7 @@ struct _Method {
 	VarDeclP args;
 	TreeP body;
 	char* type;
+	bool over;
 	struct _Method *next;
 };
 
@@ -103,12 +112,15 @@ struct _Class {
 	VarDeclP var;
 	MethodP method;
 	MethodP constructor;
-	//struct _Class *super;
 	char* super;
+	ClassP superC;
 	struct _Class *next;
 };
 
-
+struct _TeteClass {
+	char* type;
+	VarDeclP var;
+};
 
 typedef union
   { char *S;
@@ -119,12 +131,16 @@ typedef union
 	VarDeclP pV;
 	ClassP pC;
 	MethodP pM;
+	TeteP pTe;
 } YYSTYPE;
 
 #define YYSTYPE YYSTYPE
 
-
-
+//Structure environnement
+struct _Env {
+	VarDeclP var;
+	MethodP method;
+};
 
 //Fonctions pour l'AST
 	//Construction
@@ -133,9 +149,6 @@ TreeP makeLeafStr(short op, char *str); 	    /* feuille (string) */
 TreeP makeLeafInt(short op, int val);	            /* feuille (int) */
 TreeP makeTree(short op, int nbChildren, ...);	    /* noeud interne */
 TreeP makeLeafLVar(short op, VarDeclP lvar);
-//TreeP makeLeafClass(short op, s_class classe);
-//TreeP makeLeafMethod(short op, s_method met);
-
 	//Gestion
 VarDeclP addToScope(VarDeclP list, VarDeclP nouv);
 VarDeclP declVar(char *name, TreeP tree, VarDeclP decls);
@@ -143,7 +156,6 @@ VarDeclP evalDecls (TreeP tree);
 int eval(TreeP tree, VarDeclP decls);
 int evalMain(TreeP tree, VarDeclP decls);
 int evalIf(TreeP tree,VarDeclP decls);
-bool isMethodInClass(Class cl, Method met);
 int getValue(TreeP tree, VarDeclP var);
 
 
@@ -151,5 +163,21 @@ int getValue(TreeP tree, VarDeclP var);
 VarDeclP makeVarDecl(char *name, char *type, TreeP expr);
 MethodP makeMeth(char* name, VarDeclP args);
 TreeP makeBlock(VarDeclP decl, TreeP instr);
-//ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, _Class* super);
+MethodP fillMeth(MethodP meth, TreeP bloc, bool over);
+ClassP makeClass(TeteP tete, char* super, TreeP bloc);
+TeteP makeTete(char* nom, VarDeclP var);
+void attribSuper(ClassP list);
+
+void printClass(ClassP list);
+
+void makeProg(ClassP listC, TreeP bloc);
+ClassP getClass(ClassP listC, char *name);
+
+//verifs
+bool circuitHeritage(ClassP list);
+bool pbOverride(ClassP list);
+bool checkSuper(ClassP class, MethodP method);
+bool isMethodInClass(MethodP method, ClassP class);
+bool areArgTypeTheSame(VarDeclP arg1, VarDeclP arg2);
+
 #endif
