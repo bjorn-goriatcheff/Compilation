@@ -31,6 +31,17 @@ FILE *out; /* fichier de sortie pour le code engendre */
 
 int main(int argc, char **argv)
 {
+
+	//Test
+	TreeP ta = makeLeafInt(Cste,1);
+	TreeP tb = makeLeafStr(IDVAR,"test");
+	char* typea = getType(ta); printf("\n\ttype child a : %s",typea);
+	char* typeb=getType(tb); printf("\n\ttype child b : %s",typeb);
+	if(checkType(typea,typeb)==FALSE)
+		printf("test 1 OK");
+	else printf("test 1 pblm");
+	
+	
 	
 	
   int fi;
@@ -228,7 +239,8 @@ void makeProg(ClassP listC, TreeP bloc) {
 	//VERIFICATIONS CONTEXTUELLES
 	if(circuitHeritage(listC)) setError(CONTEXT_ERROR); // verif circuit d'heritage
 	if(pbOverride(listC)) setError(CONTEXT_ERROR); // verif des overrides
-	
+	if(checkProgram(bloc,listC)==FALSE) 
+		printf("\nErreur Prog");
 	if(errorCode != NO_ERROR) printf("\nVerifications contextuelles echouees !\n");
 	else printf("\nVerifications contextuelles reussies !\n");
 	// CODE GENERATION
@@ -422,121 +434,4 @@ int getValue(TreeP tree, VarDeclP decls) {
 	}
 }*/
 
-/** 
- * program : programme à vérifier
- * ClassInProg : liste de toutes les classes déclarées dans le programme
-**/
-bool checkProgram (TreeP program, ClassP ClassInProg)
-{
-	if(program==NULL)
-		return FALSE;
-	bool classChecked = FALSE; /*la liste des classe est OK ou aps OK*/
-	bool blocChecked = FALSE; /*les blocs sont OK ou pas */
-	ClassP cTemp=NULL;
-	
-	//On commence par checker la liste des classes du programme
-	if(ClassInProg==NULL) /* Pas de classes à vérifier */
-		classChecked = TRUE;
-	else	
-		cTemp=ClassInProg;
-	
-	if(classChecked==FALSE)
-		while(cTemp!=NULL)
-		{					/* refaire checkClass */
-			classChecked = classChecked && checkClass(cTemp) ;
-			cTemp=cTemp->next;
-		}
-		
-	/* Accès au bloc principal. Pas sûre que se soit le child 0  */
-	TreeP actualBloc=getChild(program,0);
-	//On check les blocs
-	if(getChild(actualBloc,0)!=NULL) /* On a des declarations de var*/
-		blocChecked = checkBloc(actualBloc, getChild(actualBloc,0)->u.lvar);
-	else /* On n'a pas de déclaration de variables */
-		blocChecked = checkBloc(actualBloc, NULL);
-	
-	//si les deux sont OK, le prog est OK
-	return classChecked && blocChecked;
-}
-	
-bool checkBloc(TreeP bloc, VarDeclP listDec)
-{
-	if (bloc == NULL) /* Rien à checker*/
-		return TRUE;
-		
-	switch (bloc->op) 
-		case AFFEC: /* Si c'est une affectation on vérifier le typage */
-			char *typeVar = getType(getChild(bloc,0)); // A FAIRE
-			char* typeVal = getType(getChild(bloc,1));
-			if(strcmp(typeVar,typeVal)==0)
-				return TRUE;
-			return FALSE;
-			break;
-	
-		case ISBLOCK : /* Si c'est un block */
-			if(listDec != NULL && getChild(bloc,1)==NULL ) /* On a la liste des déclarations mais pas d'instructions */
-				return FALSE;
-			/* On va verifier la liste de declaration*/
-			if( checkDecl(getChild(bloc,0), listDec)==FALSE )
-				return FALSE;
-			/* On verifie les instructions */
-			return checkInst(getChild(bloc,1) , listDec); // A FAIRE 
-			break;		
-}
 
-bool checkDecl(TreeP bloc, VarDeclP listDec)
-{
-	VarDeclP temp= listDec;
-	
-	while (temp != NULL)
-		if(temp->varType==NULL) /*Pas de type*/
-			return FALSE;
-		if(temp->expr==NULL) /* Pas d'expr */
-			return FALSE;
-		char* exprType = getType( getChild(temp->expr,0));
-		if(strcmp(temp->varType,exprType)!=0) /*Problème de typage*/
-			return FALSE;
-		temp=temp->next;
-	return TRUE;
-}
-
-bool checkClass(ClassP listClass, ClassP c)
-{	/* Le nom est ok, la liste des Var est ok, les methodes+const sont ok et la classe mere est ok si elle existe */
-    bool nomOk,varOk,metOk, consOk, herOk;
-    if( c->name!=NULL && c->name[0] >= 'A' && c->name[0] <= 'Z' )
-        { nomOk=TRUE; }
-
-    metOk=checkListMethod(c); //A FAIRE
-    consOk=checkAMethod(c->constructor); // A FAIRE
-    varOk=checkAttribut(c->var);  // A FAIRE
-
-    if(c->super==NULL)
-        { herOk=TRUE;}
-    else
-		herOk=checkHeritage(listClass, c, getClass(listClass, c->super) );
-    if(nomOk && metOk && varOk && herOk && consOk)
-        { return TRUE;}
-    return FALSE;
-}
-
-bool checkHeritage(ClassP listClass, ClassP actualClass, ClassP super)
-{
-		/* on vérifie que la classe mere existe bien */
-		if(checkClass(listClass,super)==FALSE )
-			return FALSE;
-		/* On vérifie qu'elle a bien été déclarée avant actualClass */
-		classP temp = listClass;
-		while(temp!=NULL)
-			if(strcmp(temp->name,super->name)==0) /*On trouve la super avant actualClass*/
-				return TRUE,
-			if(strcmp(temp->name,actualClass->name)==0) /*On troue actualClass avant sa super*/
-				return FALSE;
-			temp=temp->next;
-		/* On a rien trouvé : problème */
-		abort();
-		return FALSE;
-}
- 
-bool checkAttribut(c->var)
-{ //Vérifier qu'un attribut existe et n'est pas présent 2 fois dans la liste
-}

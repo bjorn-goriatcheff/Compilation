@@ -43,7 +43,6 @@ typedef unsigned char bool;
 #define AFFEC 24
 
 
-
 /* Codes d'erreurs */
 #define NO_ERROR	0
 #define USAGE_ERROR	1
@@ -151,6 +150,7 @@ int eval(TreeP tree, VarDeclP decls);
 int evalMain(TreeP tree, VarDeclP decls);
 int evalIf(TreeP tree,VarDeclP decls);
 int getValue(TreeP tree, VarDeclP var);
+TreeP getChild(TreeP tree, int rank);
 
 
 //Remplissage de structures
@@ -166,6 +166,7 @@ void printClass(ClassP list);
 
 void makeProg(ClassP listC, TreeP bloc);
 ClassP getClass(ClassP listC, char *name);
+char* getType(TreeP bloc);
 
 //verifs
 bool circuitHeritage(ClassP list);
@@ -173,4 +174,12 @@ bool pbOverride(ClassP list);
 bool checkSuper(ClassP class, MethodP method);
 bool isMethodInClass(MethodP method, ClassP class);
 bool areArgTypeTheSame(VarDeclP arg1, VarDeclP arg2);
+bool checkProgram (TreeP program, ClassP ClassInProg);
+bool checkAttribut(VarDeclP var);
+bool checkClass(ClassP listClass, ClassP c);
+bool checkDecl(TreeP bloc, VarDeclP listDec);
+bool checkBloc(TreeP bloc, VarDeclP listDec);
+bool checkInstructions(TreeP bloc , VarDeclP var);
+bool checkType(char* va, char* vb);
+
 #endif
