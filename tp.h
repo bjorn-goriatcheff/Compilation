@@ -115,6 +115,7 @@ struct _Class {
 	char* super;
 	ClassP superC;
 	struct _Class *next;
+	EnvP env;
 };
 
 struct _TeteClass {
@@ -188,10 +189,12 @@ bool verifEnv(ClassP classL, TreeP bloc);
 EnvP creerEnv(ClassP classL);
 EnvP recupEnv(char* mere, ClassP deb, EnvP env);
 EnvP envCat(EnvP envM, EnvP envF);
+EnvP checkEnv(char* mere, ClassP classL);
 bool isVarInEnv(VarDeclP var1, VarDeclP var2);
 EnvP rempliEnv(ClassP classL, ClassP deb, EnvP debE, EnvP glob);
 void afficheEnv(EnvP glob, bool aff);
 void afficheVarDecl(VarDeclP varL);
+void envVarCat(VarDeclP mere, VarDeclP fille, VarDeclP temp);
 
 
 

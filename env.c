@@ -62,13 +62,11 @@ EnvP rempliEnv(ClassP classL, ClassP deb, EnvP debE, EnvP glob){
 		else {
 			//Remplissage temporaire
 			glob->next=creerEnv(classL->next);
-			/*heritage
-			char* mere=classL->next->super;
-			EnvP filleE = creerEnv(classL->next);
-			EnvP mereE = recupEnv(mere, deb, debE);
-			// MAJ env fille	
-			glob->next=envCat(mereE, filleE);
-			*/	
+			
+			//char* mere=classL->next->super;
+			//EnvP filleE = creerEnv(classL->next);
+			//EnvP mereE = checkEnv(mere,deb);
+			//glob->next=envCat(mereE, filleE);
 		}
 
 		rempliEnv(classL->next, deb, debE, glob->next);		
@@ -83,47 +81,50 @@ EnvP creerEnv(ClassP classL){
 	
 	glob->var=classL->var;
 	glob->method=classL->method;
+	classL->env=glob;
 	return glob;
 }
 
-EnvP recupEnv(char* mere, ClassP deb, EnvP env){
-	if(deb->name!=NULL){
-		if(strcmp(mere, deb->name)==0){
-			return env;
+EnvP checkEnv(char* mere, ClassP classL){
+	if(classL!=NULL){
+		if(strcmp(mere, classL->name)==0){
+			return classL->env;
 		}
 		else{
-			return recupEnv(mere, deb->next, env->next);
-		}
+			checkEnv(mere, classL->next);
+
+		}	
 	}
-	abort();
 	return NULL;
 }
+
+
 
 /* EnvCat masque les champs ddeja existant dans la mère et copie le reste dans l'env de la fille 
 	Mise à jour de l'environnement de la fille (Enrichissement)
 
 */
 EnvP envCat(EnvP envM, EnvP envF){
-	EnvP debut = envF;
-	EnvP envTemp = NEW(1, Env);
-	if(areArgNotTheSame(envM->var, envF->var)){
-		envF->var->next=envM->var;
+	VarDeclP tempV = NEW(1, VarDecl);
+	//copie des champs
+	if(envM->var!=NULL){
+		envVarCat(envM->var, envF->var, tempV);
+	}
+	//envF->var->next=tempV;
+	return envF;
+}
+/* On deverse les variables non présentes dans la fille dans temp */
+void envVarCat(VarDeclP mere, VarDeclP fille, VarDeclP temp){
+	if(mere!=NULL){
+		/*if(!isVarInEnv(mere, fille)){
+			temp=mere;
+			temp->next=NULL;
+			envVarCat(mere->next, fille, temp->next);
+		}*/
 	}
 	else{
-		/* Tant qu'on a pas verifier l'ensemble de l'env de la mere */
-		while(envM->var!=NULL){
-			/* si le champ de la mèere existe dans la fille */
-			if(!isVarInEnv(envM->var, envF->var)){
-				/* on copie le champ de la mère dans l'env de la fille */
-				envTemp->var=envM->var;
-				/* ATTENTION: on supprime le chainage avec le reste de la liste de champs de la mère */
-				envTemp->var->next=NULL;
-				/* copie du champ */
-				envF->var->next= envTemp->var;
-			}
-		 }
+		temp=NULL;
 	}
-	return debut;
 }
 
 bool isVarInEnv(VarDeclP var1, VarDeclP var2){
