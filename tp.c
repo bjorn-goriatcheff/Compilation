@@ -347,15 +347,12 @@ int getValue(TreeP tree, VarDeclP decls) {
 		
 		case IDVAR: 
 			printf("IDVAR: %s ", tree->u.str);
-
 			break;
 		case Id:
 			printf("Id: %s ", tree->u.str);
-
 			break;
 		case Cste : 
 			printf("Cste: %d ", tree->u.val);
-
 			break;
 		case EQ: 
 			printf("\nEQ: ");
@@ -401,12 +398,10 @@ int getValue(TreeP tree, VarDeclP decls) {
 			break;
 		case ITE : 
 			printf("\nITE: ");
-
 			printTree(getChild(tree,0),compteur);
 			printf("\t");	
 			printTree(getChild(tree,1),compteur);
 			printf("\t");
-
 			printTree(getChild(tree,2),compteur);
 		
 			break;
@@ -422,5 +417,3 @@ int getValue(TreeP tree, VarDeclP decls) {
 			exit(UNEXPECTED);
 	}
 }*/
-
-

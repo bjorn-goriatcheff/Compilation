@@ -1,8 +1,7 @@
+#include <string.h>
 #include <stdio.h>
 #include "tp.h"
 #include "tp_y.h"
-#include "env.c"
-
 
 extern char *strdup(const char*);
 

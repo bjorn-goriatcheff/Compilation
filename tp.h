@@ -139,10 +139,7 @@ typedef union
 //Structure environnement
 struct _Env {
 	VarDeclP var;
-	MethodP method;	
-	EnvP next;
-	EnvP herit;
-	
+	MethodP method;
 };
 
 //Fonctions pour l'AST
@@ -183,18 +180,14 @@ bool checkSuper(ClassP class, MethodP method);
 bool isMethodInClass(MethodP method, ClassP class);
 bool areArgTypeTheSame(VarDeclP arg1, VarDeclP arg2);
 
-//ENV
+//environnement
 bool verifEnv(ClassP classL, TreeP bloc);
 EnvP creerEnv(ClassP classL);
 EnvP recupEnv(char* mere, ClassP deb, EnvP env);
 EnvP envCat(EnvP envM, EnvP envF);
 bool isVarInEnv(VarDeclP var1, VarDeclP var2);
 
-
-
-
-
-
+//Generation de code
 
 
 #endif
