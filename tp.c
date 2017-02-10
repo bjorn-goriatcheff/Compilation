@@ -224,8 +224,19 @@ ClassP makeClass(TeteP tete, char* super, TreeP bloc){
 }
 
 void makeProg(ClassP listC, TreeP bloc) {
-	attribSuper(listC);
+	//CREATION DES CLASSES PREDEFINIES
+	ClassP integer = NEW(1, Class);
+	integer->name = "Integer";
+	integer->next = listC;
+	ClassP string = NEW(1, Class);
+	string->name = "String";
+	string->next = integer;
+	listC = string;
+	
 	//VERIFICATIONS CONTEXTUELLES
+	attribSuper(listC);
+	attribType(listC);
+	attribTypeBlock(bloc, listC);
 	if(circuitHeritage(listC)) setError(CONTEXT_ERROR); // verif circuit d'heritage
 	if(pbOverride(listC)) setError(CONTEXT_ERROR); // verif des overrides
 	
@@ -238,8 +249,46 @@ void attribSuper(ClassP list) { //complete le champ superC avec la classe corres
 	ClassP temp = list;
 	
 	while(temp != NULL) {
-	temp->superC = getClass(list, temp->super);
-	temp = temp->next;
+		temp->superC = getClass(list, temp->super);
+		temp = temp->next;
+	}
+}
+
+void attribType(ClassP list) {
+	ClassP temp = list;
+	
+	while(temp != NULL) {
+		attribTypeChamp(temp->var, list);
+		attribTypeMeth(temp->method, list);
+		temp = temp->next;
+	}
+}
+
+void attribTypeChamp(VarDeclP listChamps, ClassP list) {
+	VarDeclP temp = listChamps;
+	
+	while(temp != NULL) {
+		temp->varTypeC = getClass(list, temp->varType);
+		temp = temp->next;
+	}
+}
+
+void attribTypeMeth(MethodP listMeth, ClassP list) {
+	MethodP temp = listMeth;
+	
+	while(temp != NULL) {
+		temp->typeC = getClass(list, temp->type);
+		attribTypeBlock(temp->body, list);
+		temp = temp->next;
+	}
+}
+
+void attribTypeBlock(TreeP bloc, ClassP list) {
+	VarDeclP var = bloc->u.children[0]->u.lvar;
+	
+	while(var != NULL) {
+		var->varTypeC = getClass(list, var->varType);
+		var = var->next;
 	}
 }
 

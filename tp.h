@@ -91,6 +91,7 @@ struct _Tree {
 struct _VarDecl {
   char *name;
   char *varType;
+  ClassP varTypeC;
   TreeP expr;
   struct _VarDecl *next;
 };
@@ -100,6 +101,7 @@ struct _Method {
 	VarDeclP args;
 	TreeP body;
 	char* type;
+	ClassP typeC;
 	bool over;
 	struct _Method *next;
 };
@@ -151,6 +153,7 @@ int eval(TreeP tree, VarDeclP decls);
 int evalMain(TreeP tree, VarDeclP decls);
 int evalIf(TreeP tree,VarDeclP decls);
 int getValue(TreeP tree, VarDeclP var);
+TreeP getChild(TreeP tree, int rank);
 
 
 //Remplissage de structures
@@ -161,6 +164,10 @@ MethodP fillMeth(MethodP meth, TreeP bloc, bool over);
 ClassP makeClass(TeteP tete, char* super, TreeP bloc);
 TeteP makeTete(char* nom, VarDeclP var);
 void attribSuper(ClassP list);
+void attribType(ClassP list);
+void attribTypeChamp(VarDeclP listChamps, ClassP list);
+void attribTypeMeth(MethodP listMeth, ClassP list);
+void attribTypeBlock(TreeP bloc, ClassP list);
 
 void printClass(ClassP list);
 
