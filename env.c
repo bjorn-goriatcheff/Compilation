@@ -1,6 +1,27 @@
 #include "tp.h"
 #include <string.h>
 
+void afficheEnv(EnvP glob, bool aff){
+	if(aff==TRUE){
+		printf("affichage de l'environnement \n");
+	}
+	if(glob!=NULL){
+		afficheVarDecl(glob->var);
+		afficheEnv(glob->next, FALSE);
+	}
+	else{
+		printf("fin affichage \n");
+	}
+}
+
+void afficheVarDecl(VarDeclP varL){
+	if(varL!=NULL){
+		char* var=varL->name;
+		printf("variable %s \n", var);
+		afficheVarDecl(varL->next);		
+	}
+}
+
 bool areArgNotTheSame(VarDeclP arg1, VarDeclP arg2) { // retourn TRUE si tous les arguments sont différents
 	bool retour = FALSE;
 
@@ -23,32 +44,38 @@ bool verifEnv(ClassP classL, TreeP bloc){
 	ClassP debut = classL;
 	/* pointeur vers le premier env */
 	EnvP debutE = glob;
-	/* transmission */
-	
-	while(classL!=NULL){
+	/* remplissage recurssif */
+	glob=rempliEnv(classL, debut, debutE, glob);
+	/* verif compatibilité glob/loc recurrsif */
+	afficheEnv(glob, TRUE);
+	//ATTENTION TRUE TEMPORAIRE
+	return TRUE;
+
+}
+
+EnvP rempliEnv(ClassP classL, ClassP deb, EnvP debE, EnvP glob){
+	if(classL->next!=NULL){
 		/* sans heritage */
 		if(classL->next->super==NULL){
 			glob->next=creerEnv(classL->next);
 		}
 		else {
+			//Remplissage temporaire
+			glob->next=creerEnv(classL->next);
+			/*heritage
 			char* mere=classL->next->super;
 			EnvP filleE = creerEnv(classL->next);
-			EnvP mereE = recupEnv(mere, debut, debutE);
+			EnvP mereE = recupEnv(mere, deb, debE);
 			// MAJ env fille	
-			filleE=envCat(mereE, filleE);	
-		}	
-		
+			glob->next=envCat(mereE, filleE);
+			*/	
+		}
+
+		rempliEnv(classL->next, deb, debE, glob->next);		
 	}
-	
-	/* ITÉRATION/RECCURSION */
-
-
-	/* verif compatibilité glob/loc recurrsif */
-
-	//ATTENTION TRUE TEMPORAIRE
-	return TRUE;
-
+	return glob;
 }
+
 
 EnvP creerEnv(ClassP classL){
 	EnvP glob = NEW(1, Env);
@@ -64,7 +91,9 @@ EnvP recupEnv(char* mere, ClassP deb, EnvP env){
 		if(strcmp(mere, deb->name)==0){
 			return env;
 		}
-		else return recupEnv(mere, deb->next, env->next);
+		else{
+			return recupEnv(mere, deb->next, env->next);
+		}
 	}
 	abort();
 	return NULL;
