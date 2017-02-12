@@ -234,6 +234,7 @@ void makeProg(ClassP listC, TreeP bloc) {
 	listC = string;
 	
 	//VERIFICATIONS CONTEXTUELLES
+	if(checkDoublonClass(listC)) setError(CONTEXT_ERROR); // verif doublons
 	attribSuper(listC);
 	attribType(listC);
 	attribTypeBlock(bloc, listC);
@@ -243,53 +244,6 @@ void makeProg(ClassP listC, TreeP bloc) {
 	if(errorCode != NO_ERROR) printf("\nVerifications contextuelles echouees !\n");
 	else printf("\nVerifications contextuelles reussies !\n");
 	// CODE GENERATION
-}
-
-void attribSuper(ClassP list) { //complete le champ superC avec la classe correspondante au champ super
-	ClassP temp = list;
-	
-	while(temp != NULL) {
-		temp->superC = getClass(list, temp->super);
-		temp = temp->next;
-	}
-}
-
-void attribType(ClassP list) {
-	ClassP temp = list;
-	
-	while(temp != NULL) {
-		attribTypeChamp(temp->var, list);
-		attribTypeMeth(temp->method, list);
-		temp = temp->next;
-	}
-}
-
-void attribTypeChamp(VarDeclP listChamps, ClassP list) {
-	VarDeclP temp = listChamps;
-	
-	while(temp != NULL) {
-		temp->varTypeC = getClass(list, temp->varType);
-		temp = temp->next;
-	}
-}
-
-void attribTypeMeth(MethodP listMeth, ClassP list) {
-	MethodP temp = listMeth;
-	
-	while(temp != NULL) {
-		temp->typeC = getClass(list, temp->type);
-		attribTypeBlock(temp->body, list);
-		temp = temp->next;
-	}
-}
-
-void attribTypeBlock(TreeP bloc, ClassP list) {
-	VarDeclP var = bloc->u.children[0]->u.lvar;
-	
-	while(var != NULL) {
-		var->varTypeC = getClass(list, var->varType);
-		var = var->next;
-	}
 }
 
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
@@ -382,93 +336,11 @@ int getValue(TreeP tree, VarDeclP decls) {
 	}
 }	
 
-/* tree : l'ast d'une expression 
- * d : liste des variables déjà déclarées avec une valeur
-*/
-/*void printTree(TreeP tree, int compteur)
-{
-	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
-	printf("\nprofondeur: %d\n ", compteur);
-	compteur++;
-	switch (tree->op)
-	{
-		
-		case IDVAR: 
-			printf("IDVAR: %s ", tree->u.str);
+void printClass(ClassP list) {
+	ClassP temp = list;
 
-			break;
-		case Id:
-			printf("Id: %s ", tree->u.str);
-
-			break;
-		case Cste : 
-			printf("Cste: %d ", tree->u.val);
-
-			break;
-		case EQ: 
-			printf("\nEQ: ");
-			printTree(getChild(tree,0),compteur);
-			printf("  ,  ");	
-			printTree(getChild(tree,1),compteur);
-		
-			break;
-		case NE: 
-			printf("\nNE: ");
-			printTree(getChild(tree,0),compteur);
-			printf("\t");	
-			printTree(getChild(tree,1),compteur);
-		
-			break;
-		case LT : 
-			printf("\nLT: ");
-			printTree(getChild(tree,0),compteur);
-			printf("\t");	
-			printTree(getChild(tree,1),compteur);
-	
-			break;
-		case LE: 
-			printf("\nLE: ");
-			printTree(getChild(tree,0),compteur);
-			printf("\t");	
-			printTree(getChild(tree,1),compteur);
-	
-			break;
-		case GT:
-			printf("\nGT: ");
-			printTree(getChild(tree,0),compteur);
-			printf("\t");	
-			printTree(getChild(tree,1),compteur);
-	
-			break;
-		case GE :
-			printf("\nGE: ");
-			printTree(getChild(tree,0),compteur);
-			printf("\t");	
-			printTree(getChild(tree,1),compteur);
-	
-			break;
-		case ITE : 
-			printf("\nITE: ");
-
-			printTree(getChild(tree,0),compteur);
-			printf("\t");	
-			printTree(getChild(tree,1),compteur);
-			printf("\t");
-
-			printTree(getChild(tree,2),compteur);
-		
-			break;
-		case EADD: case EMINUS:  case EMULT : case EDIV : 
-			printf("\nADD/MIN/MULT/DIV: ");
-			printTree(getChild(tree,0),compteur);
-			printf("\t");	
-			printTree(getChild(tree,1),compteur);
-		
-			break;
-		default:
-			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
-			exit(UNEXPECTED);
+	while(temp != NULL) {
+		printf("%s", temp->name);
+		temp=temp->next;
 	}
-}*/
-
-
+}

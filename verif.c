@@ -111,11 +111,71 @@ bool circuitHeritage(ClassP list) { //retourne TRUE si le programme contient un 
 	return FALSE;
 }
 
-void printClass(ClassP list) {
+void attribSuper(ClassP list) { //complete le champ superC avec la classe correspondante au champ super
 	ClassP temp = list;
-
+	
 	while(temp != NULL) {
-		printf("%s", temp->name);
-		temp=temp->next;
+		temp->superC = getClass(list, temp->super);
+		temp = temp->next;
 	}
+}
+
+void attribType(ClassP list) {
+	ClassP temp = list;
+	
+	while(temp != NULL) {
+		attribTypeChamp(temp->var, list);
+		attribTypeMeth(temp->method, list);
+		temp = temp->next;
+	}
+}
+
+void attribTypeChamp(VarDeclP listChamps, ClassP list) {
+	VarDeclP temp = listChamps;
+	
+	while(temp != NULL) {
+		temp->varTypeC = getClass(list, temp->varType);
+		temp = temp->next;
+	}
+}
+
+void attribTypeMeth(MethodP listMeth, ClassP list) {
+	MethodP temp = listMeth;
+	
+	while(temp != NULL) {
+		temp->typeC = getClass(list, temp->type);
+		attribTypeBlock(temp->body, list);
+		temp = temp->next;
+	}
+}
+
+void attribTypeBlock(TreeP bloc, ClassP list) {
+	for(int i = 0; i < bloc->nbChildren; i++) {
+		TreeP child = bloc->u.children[i];
+		if(child != NULL) attribTypeBlock(child, list);
+	}
+	
+	if(bloc->op == BLOCK) {
+		VarDeclP var = bloc->u.children[0]->u.lvar;
+		while(var != NULL) {
+			var->varTypeC = getClass(list, var->varType);
+			var = var->next;
+		}
+	}
+}
+
+bool checkDoublonClass(ClassP list) { // TRUE si plusieurs classes ont le meme nom
+	ClassP temp = list;
+	bool retour = FALSE;
+	
+	while(temp != NULL) {
+		ClassP temp2 = list;
+		while(temp2 != NULL) {
+			if(temp != temp2 && strcmp(temp->name, temp2->name) == 0) {printf("\nLa classe %s existe plusieurs fois.", temp->name); retour = TRUE;}
+			temp2 = temp2->next;
+		}
+		temp = temp->next;
+	}
+	
+	return retour;
 }

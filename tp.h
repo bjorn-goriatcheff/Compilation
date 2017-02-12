@@ -61,12 +61,6 @@ typedef struct _Tree Tree, *TreeP;
 struct _VarDecl;
 typedef struct _VarDecl VarDecl, *VarDeclP;
 
-struct _Arg;
-typedef struct _Arg Arg, *ArgP;
-
-struct _Block;
-typedef struct _Block Block, *BlockP;
-
 struct _Method;
 typedef struct _Method Method, *MethodP;
 
@@ -163,21 +157,22 @@ TreeP makeBlock(VarDeclP decl, TreeP instr);
 MethodP fillMeth(MethodP meth, TreeP bloc, bool over);
 ClassP makeClass(TeteP tete, char* super, TreeP bloc);
 TeteP makeTete(char* nom, VarDeclP var);
-void attribSuper(ClassP list);
-void attribType(ClassP list);
-void attribTypeChamp(VarDeclP listChamps, ClassP list);
-void attribTypeMeth(MethodP listMeth, ClassP list);
-void attribTypeBlock(TreeP bloc, ClassP list);
 
 void printClass(ClassP list);
 
 void makeProg(ClassP listC, TreeP bloc);
-ClassP getClass(ClassP listC, char *name);
 
 //verifs
+ClassP getClass(ClassP listC, char *name);
 bool circuitHeritage(ClassP list);
 bool pbOverride(ClassP list);
 bool checkSuper(ClassP class, MethodP method);
 bool isMethodInClass(MethodP method, ClassP class);
 bool areArgTypeTheSame(VarDeclP arg1, VarDeclP arg2);
+void attribSuper(ClassP list);
+void attribType(ClassP list);
+void attribTypeChamp(VarDeclP listChamps, ClassP list);
+void attribTypeMeth(MethodP listMeth, ClassP list);
+void attribTypeBlock(TreeP bloc, ClassP list);
+bool checkDoublonClass(ClassP list);
 #endif

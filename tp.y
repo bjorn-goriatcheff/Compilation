@@ -43,7 +43,7 @@ classLOpt: { $$ = NIL(Class); }
 classDecl: classHeader IS '{' declListOpt methListOpt'}'   { $1->var=$4; $1->method=$5; $$=$1; }
 ;
 /* initblockOpt a faire */
-classHeader: CLASS construct extOpt initBlockOpt  { $$ = makeClass($2, $3, $4); } // FILL class 
+classHeader: CLASS construct extOpt initBlockOpt  { $$ = makeClass($2, $3, $4); }
 ;
 
 extOpt: { $$ = NIL(char); }
@@ -131,7 +131,7 @@ expression: Id						{ $$ = makeLeafStr(IDVAR, $1); }
 message: expression DOT Id '(' paramListOpt ')'      { $$ = makeTree(DOT,3, $1, makeLeafStr(IDVAR, $3), $5); }
 ;
 
-instanc: NEWW TYPE '(' paramListOpt ')'      { $$ = makeTree(NEWW, 2, $2, $4) ;}        
+instanc: NEWW TYPE '(' paramListOpt ')'      { $$ = makeTree(NEWW, 2, makeLeafStr(TYPE, $2), $4) ;}        
 ; 
 
 paramListOpt: { $$=NIL(Tree);}		
