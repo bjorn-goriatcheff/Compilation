@@ -1,5 +1,30 @@
-class A(xc : Integer) {x := xc} is {
+class A(xc : Integer) extends B() {var i : K; is x := xc;} is {
 	var x : Integer;
 }
 
-{}
+class B() is {
+	var lol : C;
+	var y : B;
+
+	def test() is {
+		var v : Integer;
+		var d : Y;
+	is
+		{var c : J; is {var t : Z; is test;}}
+	}
+}
+
+class C() is {
+	def test2() is {if x then {return;} else {var temp : Int; is test<inf;}}
+}
+
+{
+	var x : C;
+	var y : String;
+	var z : D;
+
+is
+
+	v := y;
+	x.test(new B(), new C()).test();
+}

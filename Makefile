@@ -1,7 +1,7 @@
-OBJ=tp.o tp_l.o tp_y.o verif.o print.o code.o
+OBJ=tp.o tp_l.o tp_y.o verif.o env.o print.o code.o
 CC=gcc
 CFLAGS=-Wall -ansi -I./ -g -std=c99
-LDFLAGS=`cat link.txt`
+LDFLAGS=-g -lfl
 tp : $(OBJ)
 	$(CC) -o tp $(OBJ) $(LDFLAGS)
 
@@ -13,6 +13,9 @@ tp.o: tp.c tp_y.h tp.h
 
 verif.o: verif.c tp_y.h tp.h
 	$(CC) $(CFLAGS) -c verif.c
+	
+env.o: env.c tp_y.h tp.h
+	$(CC) $(CFLAGS) -c env.c
 
 code.o: code.c tp_y.h tp.h
 	$(CC) $(CFLAGS) -c code.c

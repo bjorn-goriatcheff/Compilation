@@ -182,21 +182,71 @@ TreeP makeBlock(VarDeclP var, TreeP inst)
 	return(tree);
 }
 
-MethodP makeMeth(char* name, VarDeclP args) { 
+MethodP makeMeth(char* name, VarDeclP args) {
 	MethodP nouv = NEW(1, Method);
+	nouv->name = name;
+	nouv->args = args;
 	return nouv; 
 }
-/*
-ClassP makeClass(char* name, VarDeclP var, MethodP meth, MethodP cons, _Class* super){
-	ClassP classe = NEW(1, _Class);
-	classe->var=var;
-	classe->meth=meth;
-	classe->cons=cons;
-	classe->super=super;
-	classe->next=NIL(_Class);
+
+MethodP fillMeth(MethodP meth, TreeP bloc, bool over){
+	meth->type=bloc->u.children[0]->u.str;
+	meth->body=bloc->u.children[1];
+	meth->over=over;
+	return meth;
+}
+
+ClassP fillClass(ClassP class, char* super, TreeP bloc){
+	class->super = super;
+	MethodP tampon = makeMeth(class->name, class->var);
+	class->constructor = fillMeth(tampon, bloc, FALSE);
+	return class;
+}
+
+TeteP makeTete(char* nom, VarDeclP var)
+{
+    TeteP tete = NEW(1, Tete);
+    tete->type = nom;
+    tete->var = var;
+    return(tete);
+}
+
+ClassP makeClass(TeteP tete, char* super, TreeP bloc){
+	ClassP classe = NEW(1, Class);
+	classe->name=tete->type;
+	classe->constructor = NEW(1, Method);
+	classe->constructor->name=tete->type;
+	classe->constructor->body=bloc;
+	classe->constructor->args=tete->var;
+	classe->super=super; // nom de la classe et pas la structure
+	classe->next=NIL(Class);
 	return(classe);
 }
-*/
+
+void makeProg(ClassP listC, TreeP bloc) {
+	//CREATION DES CLASSES PREDEFINIES
+	ClassP integer = NEW(1, Class);
+	integer->name = "Integer";
+	integer->next = listC;
+	ClassP string = NEW(1, Class);
+	string->name = "String";
+	string->next = integer;
+	listC = string;
+	
+	//VERIFICATIONS CONTEXTUELLES
+	if(checkDoublonClass(listC)) setError(CONTEXT_ERROR); // verif doublons
+	attribSuper(listC);
+	attribType(listC);
+	attribTypeBlock(bloc, listC);
+	if(circuitHeritage(listC)) setError(CONTEXT_ERROR); // verif circuit d'heritage
+	if(pbOverride(listC)) setError(CONTEXT_ERROR); // verif des overrides
+	verifEnv(listC, bloc);
+	
+	if(errorCode != NO_ERROR) printf("\nVerifications contextuelles echouees !\n");
+	else printf("\nVerifications contextuelles reussies !\n");
+	// CODE GENERATION
+}
+
 /* eval: parcours recursif de l'AST d'une expression en cherchant dans
  * l'environnement la valeur des variables referencee
  * tree: l'AST d'une expression
@@ -286,5 +336,104 @@ int getValue(TreeP tree, VarDeclP decls) {
 	return -1;
 	}
 }	
+
+void printClass(ClassP list) {
+	ClassP temp = list;
+
+	while(temp != NULL) {
+		printf("%s", temp->name);
+		temp=temp->next;
+	}
+
+}
+
+/* tree : l'ast d'une expression 
+ * d : liste des variables déjà déclarées avec une valeur
+*/
+/*void printTree(TreeP tree, int compteur)
+{
+	if (tree == NIL(Tree)) { exit(UNEXPECTED); }
+	printf("\nprofondeur: %d\n ", compteur);
+	compteur++;
+	switch (tree->op)
+	{
+		
+		case IDVAR: 
+			printf("IDVAR: %s ", tree->u.str);
+
+			break;
+		case Id:
+			printf("Id: %s ", tree->u.str);
+
+			break;
+		case Cste : 
+			printf("Cste: %d ", tree->u.val);
+
+			break;
+		case EQ: 
+			printf("\nEQ: ");
+			printTree(getChild(tree,0),compteur);
+			printf("  ,  ");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		case NE: 
+			printf("\nNE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		case LT : 
+			printf("\nLT: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case LE: 
+			printf("\nLE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case GT:
+			printf("\nGT: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case GE :
+			printf("\nGE: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+	
+			break;
+		case ITE : 
+			printf("\nITE: ");
+
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+			printf("\t");
+
+			printTree(getChild(tree,2),compteur);
+		
+			break;
+		case EADD: case EMINUS:  case EMULT : case EDIV : 
+			printf("\nADD/MIN/MULT/DIV: ");
+			printTree(getChild(tree,0),compteur);
+			printf("\t");	
+			printTree(getChild(tree,1),compteur);
+		
+			break;
+		default:
+			fprintf(stderr, "Erreur! etiquette indefinie: %d\n", tree->op);
+			exit(UNEXPECTED);
+	}
+}*/
 
 
